@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Équipe — Îlots de Chaleur Montréal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        /* ================================================
+           Styles spécifiques à equipe.html uniquement
+           (projet card, membres, contributions, outils)
+           ================================================ */
+
+        /* ── Projet card ── */
+        .projet-card {
+            max-width: 900px;
+            margin: 2.5rem auto 0;
+            background: rgba(30,41,59,.5);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .projet-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, var(--red), var(--blue));
+        }
+        .projet-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.05rem; font-weight: 700; color: #fff;
+            margin-bottom: 1rem; line-height: 1.5;
+        }
+        .projet-meta { display: flex; flex-wrap: wrap; gap: .75rem; }
+        .meta-chip {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(255,255,255,.05);
+            border: 1px solid var(--border);
+            border-radius: 999px; padding: 5px 12px;
+            font-size: .8rem; color: #94a3b8;
+        }
+        .meta-dot { width: 6px; height: 6px; border-radius: 50%; }
+        .dot-red   { background: var(--red); }
+        .dot-blue  { background: var(--blue); }
+        .dot-gold  { background: #fbbf24; }
+        .dot-green { background: #22c55e; }
+
+        /* ── Team cards ── */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2.5rem;
+        }
+        .team-card {
+            background: rgba(30,41,59,.5);
+            border: 1px solid var(--border);
+            border-radius: 20px; padding: 2rem 1.75rem;
+            text-align: center;
+            transition: all .3s;
+            position: relative; overflow: hidden;
+        }
+        .team-card::after {
+            content: '';
+            position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+            opacity: 0; transition: opacity .3s;
+        }
+        .team-card.c1::after { background: var(--red); }
+        .team-card.c2::after { background: var(--blue); }
+        .team-card.c3::after { background: #fbbf24; }
+        .team-card.c4::after { background: #22c55e; }
+        .team-card:hover { transform: translateY(-6px); border-color: rgba(255,255,255,.15); background: rgba(30,41,59,.8); }
+        .team-card:hover::after { opacity: 1; }
+
+        /* Avatar */
+        .avatar-wrap { position: relative; width: 80px; height: 80px; margin: 0 auto 1.25rem; }
+        .avatar {
+            width: 80px; height: 80px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: #fff;
+            border: 2px solid var(--border);
+            position: relative; z-index: 1;
+        }
+        .c1 .avatar { background: linear-gradient(135deg, rgba(239,68,68,.4), rgba(239,68,68,.15)); }
+        .c2 .avatar { background: linear-gradient(135deg, rgba(56,189,248,.4), rgba(56,189,248,.15)); }
+        .c3 .avatar { background: linear-gradient(135deg, rgba(251,191,36,.4), rgba(251,191,36,.15)); }
+        .c4 .avatar { background: linear-gradient(135deg, rgba(34,197,94,.4),  rgba(34,197,94,.15));  }
+
+        .avatar-ring {
+            position: absolute; inset: -4px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            animation: spin 8s linear infinite;
+        }
+        .c1 .avatar-ring { border-top-color: var(--red);  border-right-color: rgba(239,68,68,.2); }
+        .c2 .avatar-ring { border-top-color: var(--blue); border-right-color: rgba(56,189,248,.2); }
+        .c3 .avatar-ring { border-top-color: #fbbf24;     border-right-color: rgba(251,191,36,.2); }
+        .c4 .avatar-ring { border-top-color: #22c55e;     border-right-color: rgba(34,197,94,.2);  }
+
+        .t-name { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: .3rem; }
+        .t-role { font-size: .82rem; color: #475569; margin-bottom: 1.25rem; min-height: 2.2rem; }
+
+        /* Skills */
+        .skills { display: flex; flex-wrap: wrap; gap: .4rem; justify-content: center; }
+        .skill-tag {
+            font-size: .7rem; font-weight: 600;
+            padding: 3px 9px; border-radius: 4px;
+            text-transform: uppercase; letter-spacing: .04em;
+        }
+        .c1 .skill-tag { background: rgba(239,68,68,.12);  color: #fca5a5; }
+        .c2 .skill-tag { background: rgba(56,189,248,.12); color: #7dd3fc; }
+        .c3 .skill-tag { background: rgba(251,191,36,.12); color: #fde68a; }
+        .c4 .skill-tag { background: rgba(34,197,94,.12);  color: #86efac; }
+
+        /* ── Grille contributions ── */
+        .contrib-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .contrib-card {
+            background: rgba(15,23,42,.6);
+            border: 1px solid var(--border);
+            border-radius: 12px; padding: 1.25rem;
+            transition: border-color .2s;
+        }
+        .contrib-card:hover { border-color: rgba(255,255,255,.15); }
+        .contrib-icon  { font-size: 1.4rem; margin-bottom: .6rem; }
+        .contrib-title { font-family: 'Syne', sans-serif; font-size: .9rem; font-weight: 700; color: #fff; margin-bottom: .35rem; }
+        .contrib-desc  { font-size: .78rem; color: #475569; line-height: 1.6; }
+
+        /* ── Grille outils ── */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .tool-card {
+            background: rgba(30,41,59,.4);
+            border: 1px solid var(--border);
+            border-radius: 10px; padding: 1rem;
+            display: flex; align-items: center; gap: .75rem;
+            transition: all .2s;
+        }
+        .tool-card:hover { border-color: rgba(255,255,255,.15); transform: translateY(-2px); }
+        .tool-icon { font-size: 1.4rem; flex-shrink: 0; }
+        .tool-name { font-weight: 600; font-size: .85rem; color: #e2e8f0; }
+        .tool-type { font-size: .72rem; color: #475569; }
+
+        /* ── Section remerciements ── */
+        .thanks-section {
+            background: rgba(15,23,42,.5);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+        .thanks-inner { max-width: 600px; margin: 0 auto; }
+
+        /* ── Footer ── */
+        .f-logo { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: .5rem; }
+        .f-text { font-size: .78rem; color: #334155; line-height: 1.7; }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+    <a href="index.html" class="logo">
+        <span class="logo-dot"></span>
+        <span data-lang="fr">Îlots MTL</span>
+        <span data-lang="en">MTL Heat Islands</span>
+    </a>
+    <nav class="main-nav">
+        <a href="index.html"><span data-lang="fr">Accueil</span><span data-lang="en">Home</span></a>
+        <a href="carte.html"><span data-lang="fr">Carte</span><span data-lang="en">Map</span></a>
+        <a href="donnees.html"><span data-lang="fr">Données</span><span data-lang="en">Data</span></a>
+        <a href="equipe.html" class="active"><span data-lang="fr">Équipe</span><span data-lang="en">Team</span></a>
+    </nav>
+    <div class="lang-toggle">
+        <button class="lang-btn active" onclick="setLang('fr')">FR</button>
+        <button class="lang-btn" onclick="setLang('en')">EN</button>
+    </div>
+</header>
+
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+    <div class="page-tag"><span data-lang="fr">Projet de session</span><span data-lang="en">Session Project</span></div>
+    <h1 class="page-title"><span data-lang="fr">Notre Équipe</span><span data-lang="en">Our Team</span></h1>
+    <p class="page-desc">
+        <span data-lang="fr">Quatre étudiants en géomatique appliquée à la gestion urbaine, unis autour d'un projet d'analyse cartographique des îlots thermiques de Montréal.</span>
+        <span data-lang="en">Four students in applied geomatics for urban management, united around a cartographic analysis project of Montréal's thermal islands.</span>
+    </p>
+
+    <!-- Carte du projet -->
+    <div class="projet-card reveal">
+        <div class="projet-title">
+            <span data-lang="fr">Développement d'une application cartographique web d'analyse des îlots de chaleur et d'optimisation des parcours vers les îlots de fraîcheur à Montréal</span>
+            <span data-lang="en">Development of a Web Cartographic Application for Urban Heat Island Analysis and Route Optimization to Cool Refuges in Montréal</span>
+        </div>
+        <div class="projet-meta">
+            <span class="meta-chip"><span class="meta-dot dot-red"></span><span data-lang="fr">Géomatique appliquée</span><span data-lang="en">Applied Geomatics</span></span>
+            <span class="meta-chip"><span class="meta-dot dot-blue"></span><span data-lang="fr">Gestion urbaine</span><span data-lang="en">Urban Management</span></span>
+            <span class="meta-chip"><span class="meta-dot dot-gold"></span>Mapbox GL JS · Turf.js</span>
+            <span class="meta-chip"><span class="meta-dot dot-green"></span><span data-lang="fr">Session 2024–2025</span><span data-lang="en">Session 2024–2025</span></span>
+        </div>
+    </div>
+</div>
+
+
+<!-- MEMBRES -->
+<div class="section">
+    <div class="reveal">
+        <span class="s-tag"><span data-lang="fr">Membres de l'équipe</span><span data-lang="en">Team Members</span></span>
+        <h2 class="s-title"><span data-lang="fr">Les quatre contributeurs</span><span data-lang="en">The four contributors</span></h2>
+        <p class="s-desc"><span data-lang="fr">Chaque membre a apporté son expertise spécifique pour construire cette application de bout en bout.</span><span data-lang="en">Each member brought their specific expertise to build this application end-to-end.</span></p>
+    </div>
+
+    <div class="team-grid">
+        <div class="team-card c1 reveal">
+            <div class="avatar-wrap"><div class="avatar">FD</div><div class="avatar-ring"></div></div>
+            <div class="t-name">Fall Dieumbe</div>
+            <div class="t-role"><span data-lang="fr">Géomatique & développement web</span><span data-lang="en">Geomatics & web development</span></div>
+            <div class="skills">
+                <span class="skill-tag">Mapbox GL JS</span>
+                <span class="skill-tag">JavaScript</span>
+                <span class="skill-tag">GeoJSON</span>
+            </div>
+        </div>
+
+        <div class="team-card c2 reveal">
+            <div class="avatar-wrap"><div class="avatar">GM</div><div class="avatar-ring"></div></div>
+            <div class="t-name">Gadbois-Del Carpio Marie-Hélène</div>
+            <div class="t-role"><span data-lang="fr">Analyse spatiale & données</span><span data-lang="en">Spatial analysis & data</span></div>
+            <div class="skills">
+                <span class="skill-tag">Turf.js</span>
+                <span class="skill-tag"><span data-lang="fr">Analyse spatiale</span><span data-lang="en">Spatial Analysis</span></span>
+                <span class="skill-tag">SIG</span>
+               
+            </div>
+        </div>
+
+        <div class="team-card c3 reveal">
+            <div class="avatar-wrap"><div class="avatar">KE</div><div class="avatar-ring"></div></div>
+            <div class="t-name">Konkobo Toudasida Evrard</div>
+            <div class="t-role"><span data-lang="fr">Données & cartographie</span><span data-lang="en">Data & cartography</span></div>
+            <div class="skills">
+                <span class="skill-tag"><span data-lang="fr">Données ouvertes</span><span data-lang="en">Open Data</span></span>
+                <span class="skill-tag">QGIS</span>
+                <span class="skill-tag"><span data-lang="fr">Cartographie</span><span data-lang="en">Cartography</span></span>
+            
+            </div>
+        </div>
+
+        <div class="team-card c4 reveal">
+            <div class="avatar-wrap"><div class="avatar">GA</div><div class="avatar-ring"></div></div>
+            <div class="t-name">Gueye Abdoulaye</div>
+            <div class="t-role"><span data-lang="fr">Visualisation & interface</span><span data-lang="en">Visualization & interface</span></div>
+            <div class="skills">
+                <span class="skill-tag">Chart.js</span>
+                <span class="skill-tag">UI/UX</span>
+                <span class="skill-tag">Design</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+
+<!-- CONTRIBUTIONS -->
+<div class="section">
+    <div class="reveal">
+        <span class="s-tag"><span data-lang="fr">Répartition du travail</span><span data-lang="en">Work Distribution</span></span>
+        <h2 class="s-title"><span data-lang="fr">Contributions au projet</span><span data-lang="en">Project Contributions</span></h2>
+        <p class="s-desc"><span data-lang="fr">Le projet a été structuré en modules indépendants, chacun assigné selon les compétences de chaque membre.</span><span data-lang="en">The project was structured in independent modules, each assigned according to team members' skills.</span></p>
+    </div>
+
+    <div class="contrib-grid">
+        <div class="contrib-card reveal">
+            <div class="contrib-icon">🗺️</div>
+            <div class="contrib-title"><span data-lang="fr">Carte interactive</span><span data-lang="en">Interactive Map</span></div>
+            <div class="contrib-desc"><span data-lang="fr">Intégration Mapbox GL JS, couches, contrôles, interactions — <strong style="color:#fca5a5;">map.js</strong></span><span data-lang="en">Mapbox GL JS integration, layers, controls, interactions — <strong style="color:#fca5a5;">map.js</strong></span></div>
+        </div>
+        <div class="contrib-card reveal">
+            <div class="contrib-icon">📐</div>
+            <div class="contrib-title"><span data-lang="fr">Analyse spatiale</span><span data-lang="en">Spatial Analysis</span></div>
+            <div class="contrib-desc"><span data-lang="fr">Algorithmes Turf.js, score de risque, refuges, proximité — <strong style="color:#7dd3fc;">analysis.js</strong></span><span data-lang="en">Turf.js algorithms, risk score, refuges, proximity — <strong style="color:#7dd3fc;">analysis.js</strong></span></div>
+        </div>
+        <div class="contrib-card reveal">
+            <div class="contrib-icon">📊</div>
+            <div class="contrib-title"><span data-lang="fr">Visualisation</span><span data-lang="en">Visualization</span></div>
+            <div class="contrib-desc"><span data-lang="fr">Graphiques Chart.js, page données — <strong style="color:#fde68a;">charts.js · donnees.html</strong></span><span data-lang="en">Chart.js graphs, data page — <strong style="color:#fde68a;">charts.js · donnees.html</strong></span></div>
+        </div>
+        <div class="contrib-card reveal">
+            <div class="contrib-icon">🌐</div>
+            <div class="contrib-title"><span data-lang="fr">Interface & navigation</span><span data-lang="en">Interface & Navigation</span></div>
+            <div class="contrib-desc"><span data-lang="fr">Pages HTML bilingues, CSS global, sidebar — <strong style="color:#86efac;">style.css · app.js</strong></span><span data-lang="en">Bilingual HTML pages, global CSS, sidebar — <strong style="color:#86efac;">style.css · app.js</strong></span></div>
+        </div>
+        <div class="contrib-card reveal">
+            <div class="contrib-icon">🗃️</div>
+            <div class="contrib-title"><span data-lang="fr">Préparation des données</span><span data-lang="en">Data Preparation</span></div>
+            <div class="contrib-desc"><span data-lang="fr">Conversion GeoJSON, jointures spatiales, enrichissement avec score de risque pré-calculé.</span><span data-lang="en">GeoJSON conversion, spatial joins, enrichment with pre-computed risk score.</span></div>
+        </div>
+        <div class="contrib-card reveal">
+            <div class="contrib-icon">⚙️</div>
+            <div class="contrib-title"><span data-lang="fr">Architecture</span><span data-lang="en">Architecture</span></div>
+            <div class="contrib-desc"><span data-lang="fr">Cache GeoJSON, modules JS, synchronisation map.js ↔ analysis.js ↔ charts.js.</span><span data-lang="en">GeoJSON cache, JS modules, map.js ↔ analysis.js ↔ charts.js synchronization.</span></div>
+        </div>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+
+<!-- OUTILS -->
+<div class="section">
+    <div class="reveal">
+        <span class="s-tag"><span data-lang="fr">Technologies utilisées</span><span data-lang="en">Technologies Used</span></span>
+        <h2 class="s-title"><span data-lang="fr">Stack technique</span><span data-lang="en">Tech Stack</span></h2>
+    </div>
+    <div class="tools-grid">
+        <div class="tool-card reveal"><div class="tool-icon">🗺️</div><div><div class="tool-name">Mapbox GL JS</div><div class="tool-type"><span data-lang="fr">Rendu cartographique</span><span data-lang="en">Map rendering</span></div></div></div>
+        <div class="tool-card reveal"><div class="tool-icon">📐</div><div><div class="tool-name">Turf.js</div><div class="tool-type"><span data-lang="fr">Analyse spatiale</span><span data-lang="en">Spatial analysis</span></div></div></div>
+        <div class="tool-card reveal"><div class="tool-icon">📊</div><div><div class="tool-name">Chart.js</div><div class="tool-type"><span data-lang="fr">Visualisation stat.</span><span data-lang="en">Statistical viz.</span></div></div></div>
+        <div class="tool-card reveal"><div class="tool-icon">🌐</div><div><div class="tool-name">HTML5 / CSS3</div><div class="tool-type"><span data-lang="fr">Interface bilingue</span><span data-lang="en">Bilingual UI</span></div></div></div>
+        <div class="tool-card reveal"><div class="tool-icon">⚡</div><div><div class="tool-name">JavaScript ES6+</div><div class="tool-type"><span data-lang="fr">Logique applicative</span><span data-lang="en">App logic</span></div></div></div>
+        <div class="tool-card reveal"><div class="tool-icon">🗺️</div><div><div class="tool-name">QGIS</div><div class="tool-type"><span data-lang="fr">SIG bureau</span><span data-lang="en">Desktop GIS</span></div></div></div>
+        <div class="tool-card reveal"><div class="tool-icon">📦</div><div><div class="tool-name">GeoJSON</div><div class="tool-type"><span data-lang="fr">Format de données</span><span data-lang="en">Data format</span></div></div></div>
+        <div class="tool-card reveal"><div class="tool-icon">🐍</div><div><div class="tool-name">Python · GeoPandas</div><div class="tool-type"><span data-lang="fr">Traitement des données</span><span data-lang="en">Data processing</span></div></div></div>
+        <div class="tool-card reveal"><div class="tool-icon">📊</div><div><div class="tool-name">R · sf · tmap · GAM</div><div class="tool-type"><span data-lang="fr">Analyse statistique spatiale</span><span data-lang="en">Spatial statistical analysis</span></div></div></div>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+
+<!-- SOURCES -->
+<div class="section">
+    <div class="reveal">
+        <span class="s-tag"><span data-lang="fr">Sources</span><span data-lang="en">Data Sources</span></span>
+        <h2 class="s-title"><span data-lang="fr">Données & références</span><span data-lang="en">Data & References</span></h2>
+    </div>
+    <div class="contrib-grid" style="margin-top:2rem;">
+        <div class="contrib-card reveal">
+            <div class="contrib-icon">🌡️</div>
+            <div class="contrib-title"><span data-lang="fr">Îlots thermiques</span><span data-lang="en">Thermal Islands</span></div>
+            <div class="contrib-desc"><span data-lang="fr">Données de classification thermique · Ville de Montréal — Données ouvertes</span><span data-lang="en">Thermal classification data · City of Montréal — Open Data</span></div>
+        </div>
+        <div class="contrib-card reveal">
+            <div class="contrib-icon">👥</div>
+            <div class="contrib-title"><span data-lang="fr">Démographie</span><span data-lang="en">Demographics</span></div>
+            <div class="contrib-desc"><span data-lang="fr">Recensement 2021, unités de diffusion · Statistique Canada</span><span data-lang="en">2021 Census, dissemination areas · Statistics Canada</span></div>
+        </div>
+        <div class="contrib-card reveal">
+            <div class="contrib-icon">🛣️</div>
+            <div class="contrib-title"><span data-lang="fr">Réseau routier</span><span data-lang="en">Road Network</span></div>
+            <div class="contrib-desc"><span data-lang="fr">Adresses Québec (AQ) · Ministère des Transports du Québec (MTQ)</span><span data-lang="en">Adresses Québec (AQ) · Ministère des Transports du Québec (MTQ)</span></div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<!-- FOOTER -->
+<footer>
+    <div class="f-logo">🌡️ Îlots de Chaleur — Montréal</div>
+    <p class="f-text">
+        <span data-lang="fr">Projet de session · Géomatique appliquée à la gestion urbaine · 2024–2025</span>
+        <span data-lang="en">Session project · Geomatics Applied to Urban Management · 2024–2025</span><br>
+        Fall Dieumbe · Gadbois-Del Carpio Marie-Hélène · Gueye Abdoulaye · Konkobo Toudasida Evrard
+    </p>
+</footer>
+
+
+<script src="js/app.js"></script>
+<script>
+    const obs = new IntersectionObserver((entries) => {
+        entries.forEach((e, i) => {
+            if (e.isIntersecting) {
+                setTimeout(() => e.target.classList.add('visible'), i * 60);
+                obs.unobserve(e.target);
+            }
+        });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+
+</body>
+</html>

@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Îlots de Chaleur — Montréal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        /* ================================================
+           Styles spécifiques à index.html uniquement
+           (hero, stats, features, method, sources, team)
+           ================================================ */
+
+        /* ── Hero ── */
+        .hero {
+            min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            position: relative; overflow: hidden;
+            padding: 6rem 2rem 4rem;
+        }
+
+        .hero-grid {
+            position: absolute; inset: 0;
+            background-image:
+                linear-gradient(rgba(56,189,248,.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(56,189,248,.04) 1px, transparent 1px);
+            background-size: 48px 48px;
+            mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+        }
+
+        .hero-glow { position: absolute; inset: 0; pointer-events: none; }
+        .hero-glow::before {
+            content: ''; position: absolute;
+            width: 700px; height: 700px; top: -150px; right: -150px;
+            background: radial-gradient(circle, rgba(239,68,68,.07) 0%, transparent 70%);
+            animation: drift 14s ease-in-out infinite alternate;
+        }
+        .hero-glow::after {
+            content: ''; position: absolute;
+            width: 600px; height: 600px; bottom: -100px; left: -100px;
+            background: radial-gradient(circle, rgba(56,189,248,.06) 0%, transparent 70%);
+            animation: drift 10s ease-in-out infinite alternate-reverse;
+        }
+
+        .hero-content { position: relative; z-index: 2; max-width: 900px; text-align: center; }
+
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(239,68,68,.1);
+            border: 1px solid rgba(239,68,68,.25);
+            border-radius: 999px; padding: 6px 16px;
+            font-size: 12px; font-weight: 600; color: #fca5a5;
+            letter-spacing: .06em; text-transform: uppercase;
+            margin-bottom: 2rem;
+            animation: fadeUp .6s ease both;
+        }
+        .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red); animation: pulse 1.5s infinite; }
+
+        .hero-title {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.6rem);
+            font-weight: 800; line-height: 1.1; color: #fff;
+            margin-bottom: 1.5rem;
+            animation: fadeUp .6s .1s ease both;
+        }
+        .accent-red  { color: var(--red); }
+        .accent-blue { color: var(--blue); }
+
+        .hero-sub {
+            font-size: 1rem; font-weight: 300; color: #94a3b8;
+            line-height: 1.75; max-width: 680px;
+            margin: 0 auto 2.5rem;
+            animation: fadeUp .6s .2s ease both;
+        }
+
+        .hero-cta {
+            display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
+            animation: fadeUp .6s .3s ease both;
+        }
+
+        /* ── Stats ── */
+        .stats-bar {
+            background: rgba(30,41,59,.6);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(8px);
+        }
+        .stats-inner {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            max-width: 1100px; margin: 0 auto;
+        }
+        .stat-item { text-align: center; padding: 1.75rem 1rem; position: relative; }
+        .stat-item + .stat-item::before {
+            content: ''; position: absolute;
+            left: 0; top: 25%; bottom: 25%;
+            width: 1px; background: var(--border);
+        }
+        .stat-num {
+            font-family: 'Syne', sans-serif;
+            font-size: 2rem; font-weight: 800; color: #fff; line-height: 1;
+            margin-bottom: .4rem;
+        }
+        .stat-num.red   { color: var(--red); }
+        .stat-num.blue  { color: var(--blue); }
+        .stat-num.gold  { color: #fbbf24; }
+        .stat-num.green { color: #22c55e; }
+        .stat-lbl { font-size: .78rem; color: #64748b; font-weight: 500; text-transform: uppercase; letter-spacing: .05em; }
+
+        /* ── Features ── */
+        .feat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+        }
+        .feat-card {
+            background: rgba(30,41,59,.5);
+            border: 1px solid var(--border);
+            border-radius: 16px; padding: 1.75rem;
+            transition: all .3s; position: relative; overflow: hidden;
+        }
+        .feat-card::before {
+            content: ''; position: absolute;
+            top: 0; left: 0; right: 0; height: 2px;
+            opacity: 0; transition: opacity .3s;
+        }
+        .feat-card.c-red::before    { background: var(--red); }
+        .feat-card.c-blue::before   { background: var(--blue); }
+        .feat-card.c-gold::before   { background: #fbbf24; }
+        .feat-card.c-green::before  { background: #22c55e; }
+        .feat-card.c-purple::before { background: #a78bfa; }
+        .feat-card.c-teal::before   { background: #2dd4bf; }
+        .feat-card:hover { border-color: rgba(255,255,255,.15); transform: translateY(-4px); background: rgba(30,41,59,.8); }
+        .feat-card:hover::before { opacity: 1; }
+        .feat-icon  { font-size: 2rem; margin-bottom: 1rem; }
+        .feat-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: .35rem; }
+        .feat-sub   { font-size: .75rem; color: #475569; font-style: italic; margin-bottom: .75rem; }
+        .feat-desc  { font-size: .85rem; color: #64748b; line-height: 1.65; }
+
+        /* ── Methodology ── */
+        .method-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem; counter-reset: step;
+        }
+        .method-step {
+            background: rgba(15,23,42,.6);
+            border: 1px solid var(--border);
+            border-radius: 12px; padding: 1.5rem;
+            position: relative; counter-increment: step;
+        }
+        .method-step::after {
+            content: counter(step, decimal-leading-zero);
+            font-family: 'Syne', sans-serif;
+            font-size: 2.8rem; font-weight: 800;
+            color: rgba(255,255,255,.035);
+            position: absolute; top: .25rem; right: .75rem;
+            line-height: 1; pointer-events: none;
+        }
+        .step-tag {
+            display: inline-block; font-size: 10px; font-weight: 700;
+            letter-spacing: .08em; text-transform: uppercase;
+            padding: 3px 8px; border-radius: 4px; margin-bottom: .75rem;
+        }
+        .step-tag.geo  { background: rgba(56,189,248,.1); color: #38bdf8; }
+        .step-tag.data { background: rgba(251,191,36,.1);  color: #fbbf24; }
+        .step-tag.algo { background: rgba(239,68,68,.1);   color: #ef4444; }
+        .step-tag.visu { background: rgba(34,197,94,.1);   color: #22c55e; }
+        .m-title { font-family: 'Syne', sans-serif; font-size: .95rem; font-weight: 700; color: #fff; margin-bottom: .35rem; }
+        .m-sub   { font-size: .72rem; color: #475569; font-style: italic; margin-bottom: .6rem; }
+        .m-desc  { font-size: .82rem; color: #64748b; line-height: 1.6; }
+
+        /* ── Sources ── */
+        .src-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1rem;
+        }
+        .src-card {
+            background: rgba(15,23,42,.6);
+            border: 1px solid var(--border);
+            border-radius: 10px; padding: 1.25rem;
+            display: flex; gap: 1rem; align-items: flex-start;
+            transition: border-color .2s;
+        }
+        .src-card:hover { border-color: rgba(255,255,255,.15); }
+        .src-icon { font-size: 1.5rem; flex-shrink: 0; margin-top: 2px; }
+        .src-name { font-weight: 600; font-size: .88rem; color: #e2e8f0; margin-bottom: 3px; }
+        .src-desc { font-size: .78rem; color: #475569; line-height: 1.5; }
+
+        /* ── Team ── */
+        .team-wrap {
+            background: rgba(15,23,42,.5);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 4rem 2rem;
+        }
+        .team-inner { max-width: 1100px; margin: 0 auto; }
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.25rem; margin-top: 2.5rem;
+        }
+        .team-card {
+            background: rgba(30,41,59,.5);
+            border: 1px solid var(--border);
+            border-radius: 12px; padding: 1.5rem 1.25rem;
+            text-align: center; transition: all .25s;
+        }
+        .team-card:hover { border-color: rgba(56,189,248,.25); transform: translateY(-3px); }
+        .team-avatar {
+            width: 52px; height: 52px; border-radius: 50%;
+            background: linear-gradient(135deg, rgba(239,68,68,.3), rgba(56,189,248,.3));
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; color: #fff;
+            margin: 0 auto 1rem;
+            border: 2px solid var(--border);
+        }
+        .t-name { font-family: 'Syne', sans-serif; font-size: .9rem; font-weight: 700; color: #fff; margin-bottom: .25rem; }
+        .t-role { font-size: .75rem; color: #475569; }
+
+        /* ── Footer local ── */
+        .f-logo { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: .5rem; }
+        .f-text { font-size: .78rem; color: #334155; line-height: 1.7; }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+    <a href="index.html" class="logo">
+        <span class="logo-dot"></span>
+        <span data-lang="fr">Îlots MTL</span>
+        <span data-lang="en">MTL Heat Islands</span>
+    </a>
+    <nav class="main-nav">
+        <a href="index.html" class="active"><span data-lang="fr">Accueil</span><span data-lang="en">Home</span></a>
+        <a href="carte.html"><span data-lang="fr">Carte</span><span data-lang="en">Map</span></a>
+        <a href="donnees.html"><span data-lang="fr">Données</span><span data-lang="en">Data</span></a>
+        <a href="equipe.html"><span data-lang="fr">Équipe</span><span data-lang="en">Team</span></a>
+    </nav>
+    <div class="lang-toggle">
+        <button class="lang-btn active" onclick="setLang('fr')">FR</button>
+        <button class="lang-btn" onclick="setLang('en')">EN</button>
+    </div>
+</header>
+
+
+<!-- HERO -->
+<div class="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-glow"></div>
+    <div class="hero-content">
+        <div class="hero-badge">
+            <span class="badge-dot"></span>
+            <span data-lang="fr">Géomatique appliquée · Gestion urbaine · Montréal</span>
+            <span data-lang="en">Applied Geomatics · Urban Management · Montréal</span>
+        </div>
+        <h1 class="hero-title">
+            <span data-lang="fr">Analyse des <span class="accent-red">îlots de chaleur</span><br>et optimisation vers les<br><span class="accent-blue">îlots de fraîcheur</span></span>
+            <span data-lang="en"><span class="accent-red">Urban Heat Island</span> Analysis<br>& <span class="accent-blue">Cool Refuge</span> Route Optimization</span>
+        </h1>
+        <p class="hero-sub">
+            <span data-lang="fr">Une application cartographique web interactive pour identifier les zones thermiques critiques, évaluer l'exposition des populations et optimiser l'accès aux refuges de fraîcheur à Montréal.</span>
+            <span data-lang="en">An interactive web mapping application to identify critical thermal zones, assess population exposure and optimize access to cool refuges across Montréal.</span>
+        </p>
+        <div class="hero-cta">
+            <a href="carte.html" class="btn-primary">🗺️ <span data-lang="fr">Ouvrir la carte interactive</span><span data-lang="en">Open interactive map</span></a>
+            <a href="donnees.html" class="btn-outline">📊 <span data-lang="fr">Explorer les données</span><span data-lang="en">Explore the data</span></a>
+        </div>
+    </div>
+</div>
+
+
+<!-- STATS -->
+<div class="stats-bar">
+    <div class="stats-inner">
+        <div class="stat-item reveal"><div class="stat-num red">3 068</div><div class="stat-lbl"><span data-lang="fr">Îlots de chaleur</span><span data-lang="en">Heat islands</span></div></div>
+        <div class="stat-item reveal"><div class="stat-num blue">1 030</div><div class="stat-lbl"><span data-lang="fr">Îlots de fraîcheur</span><span data-lang="en">Cool refuges</span></div></div>
+        <div class="stat-item reveal"><div class="stat-num gold">46 293</div><div class="stat-lbl"><span data-lang="fr">Segments routiers</span><span data-lang="en">Road segments</span></div></div>
+        <div class="stat-item reveal"><div class="stat-num green">3 281</div><div class="stat-lbl"><span data-lang="fr">Zones de population</span><span data-lang="en">Population zones</span></div></div>
+        <div class="stat-item reveal"><div class="stat-num red">5 311</div><div class="stat-lbl"><span data-lang="fr">km² chaleur</span><span data-lang="en">km² heat coverage</span></div></div>
+    </div>
+</div>
+
+
+<!-- FONCTIONNALITÉS -->
+<div class="section reveal">
+    <span class="s-tag"><span data-lang="fr">Fonctionnalités</span><span data-lang="en">Features</span></span>
+    <h2 class="s-title"><span data-lang="fr">Ce que permet l'application</span><span data-lang="en">What the application offers</span></h2>
+    <p class="s-desc"><span data-lang="fr">Développée avec Mapbox GL JS et Turf.js, l'application combine analyse spatiale, données démographiques et réseau routier pour une gestion urbaine éclairée.</span><span data-lang="en">Built with Mapbox GL JS and Turf.js, the application combines spatial analysis, demographic data and road networks for informed urban management.</span></p>
+</div>
+<div class="section" style="padding-top:0;">
+    <div class="feat-grid">
+        <div class="feat-card c-red reveal">
+            <div class="feat-icon">🔥</div>
+            <div class="feat-title"><span data-lang="fr">Cartographie thermique</span><span data-lang="en">Thermal Mapping</span></div>
+            <div class="feat-sub"><span data-lang="fr">Thermal Mapping</span><span data-lang="en">Cartographie thermique</span></div>
+            <p class="feat-desc"><span data-lang="fr">Visualisation des îlots de chaleur (classe 5) et des îlots de fraîcheur (classe 1) sur l'ensemble du territoire montréalais.</span><span data-lang="en">Visualization of heat islands (class 5) and cool refuges (class 1) across the entire Montréal territory.</span></p>
+        </div>
+        <div class="feat-card c-blue reveal">
+            <div class="feat-icon">❄️</div>
+            <div class="feat-title"><span data-lang="fr">Optimisation des refuges</span><span data-lang="en">Refuge Optimization</span></div>
+            <div class="feat-sub"><span data-lang="fr">Refuge Optimization</span><span data-lang="en">Optimisation des refuges</span></div>
+            <p class="feat-desc"><span data-lang="fr">Calcul en temps réel du refuge le plus proche depuis n'importe quel point, avec traçage de l'itinéraire en ligne verte.</span><span data-lang="en">Real-time calculation of the nearest cool refuge from any point, with green route tracing.</span></p>
+        </div>
+        <div class="feat-card c-gold reveal">
+            <div class="feat-icon">⚠️</div>
+            <div class="feat-title"><span data-lang="fr">Score de risque urbain</span><span data-lang="en">Urban Risk Score</span></div>
+            <div class="feat-sub"><span data-lang="fr">Urban Risk Score</span><span data-lang="en">Score de risque urbain</span></div>
+            <p class="feat-desc"><span data-lang="fr">Score 0–4 combinant densité de population, distance aux refuges et proximité des artères majeures (🟢🟡🟠🔴).</span><span data-lang="en">0–4 score combining population density, refuge distance and proximity to major roads (🟢🟡🟠🔴).</span></p>
+        </div>
+        <div class="feat-card c-purple reveal">
+            <div class="feat-icon">🛣️</div>
+            <div class="feat-title"><span data-lang="fr">Réseau routier</span><span data-lang="en">Road Network</span></div>
+            <div class="feat-sub"><span data-lang="fr">Road Network Analysis</span><span data-lang="en">Analyse du réseau routier</span></div>
+            <p class="feat-desc"><span data-lang="fr">Analyse de l'infrastructure routière (autoroutes, artères, collectrices) et son impact sur l'exposition thermique.</span><span data-lang="en">Analysis of road infrastructure (highways, arterials, collectors) and its impact on thermal exposure.</span></p>
+        </div>
+        <div class="feat-card c-green reveal">
+            <div class="feat-icon">👥</div>
+            <div class="feat-title"><span data-lang="fr">Population exposée</span><span data-lang="en">Exposed Population</span></div>
+            <div class="feat-sub"><span data-lang="fr">Exposed Population</span><span data-lang="en">Population exposée</span></div>
+            <p class="feat-desc"><span data-lang="fr">Croisement des données démographiques 2021 avec les zones thermiques pour identifier les populations vulnérables.</span><span data-lang="en">Cross-referencing 2021 census data with thermal zones to identify vulnerable populations.</span></p>
+        </div>
+        <div class="feat-card c-teal reveal">
+            <div class="feat-icon">🗺️</div>
+            <div class="feat-title"><span data-lang="fr">Fonds de carte multiples</span><span data-lang="en">Multiple Basemaps</span></div>
+            <div class="feat-sub"><span data-lang="fr">Multiple Basemaps</span><span data-lang="en">Fonds de carte multiples</span></div>
+            <p class="feat-desc"><span data-lang="fr">Cinq fonds disponibles : Light, OSM, Satellite, Sombre et Terrain selon le contexte d'analyse.</span><span data-lang="en">Five basemaps: Light, OSM, Satellite, Dark and Terrain for different analysis contexts.</span></p>
+        </div>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+
+<!-- MÉTHODOLOGIE -->
+<div class="section reveal">
+    <span class="s-tag"><span data-lang="fr">Approche méthodologique</span><span data-lang="en">Methodology</span></span>
+    <h2 class="s-title"><span data-lang="fr">Démarche géomatique</span><span data-lang="en">Geomatics Workflow</span></h2>
+    <p class="s-desc"><span data-lang="fr">Le projet s'appuie sur une chaîne de traitement géospatial rigoureuse, de l'acquisition des données à la visualisation interactive.</span><span data-lang="en">The project relies on a rigorous geospatial processing pipeline, from data acquisition to interactive visualization.</span></p>
+</div>
+<div class="section" style="padding-top:0;">
+    <div class="method-grid">
+        <div class="method-step reveal">
+            <span class="step-tag geo"><span data-lang="fr">Géodonnées</span><span data-lang="en">Geodata</span></span>
+            <div class="m-title"><span data-lang="fr">Acquisition des données</span><span data-lang="en">Data Acquisition</span></div>
+            <div class="m-sub"><span data-lang="fr">Data Acquisition</span><span data-lang="en">Acquisition des données</span></div>
+            <p class="m-desc"><span data-lang="fr">Collecte des données thermiques, démographiques (Recensement 2021) et routières (MTQ) pour le territoire de Montréal.</span><span data-lang="en">Collection of thermal, demographic (2021 Census) and road data (MTQ) for the Montréal territory.</span></p>
+        </div>
+        <div class="method-step reveal">
+            <span class="step-tag data"><span data-lang="fr">Traitement</span><span data-lang="en">Processing</span></span>
+            <div class="m-title"><span data-lang="fr">Préparation & enrichissement</span><span data-lang="en">Data Preparation</span></div>
+            <div class="m-sub"><span data-lang="fr">Data Preparation & Enrichment</span><span data-lang="en">Préparation & enrichissement</span></div>
+            <p class="m-desc"><span data-lang="fr">Conversion en GeoJSON, jointure spatiale avec les données de population, calcul des surfaces réelles par polygone.</span><span data-lang="en">Conversion to GeoJSON, spatial join with population data, actual surface area calculation per polygon.</span></p>
+        </div>
+        <div class="method-step reveal">
+            <span class="step-tag algo"><span data-lang="fr">Analyse</span><span data-lang="en">Analysis</span></span>
+            <div class="m-title"><span data-lang="fr">Analyse spatiale</span><span data-lang="en">Spatial Analysis</span></div>
+            <div class="m-sub"><span data-lang="fr">Spatial Analysis</span><span data-lang="en">Analyse spatiale</span></div>
+            <p class="m-desc"><span data-lang="fr">Calcul de proximité via Turf.js, intersection route/îlot, score de risque multi-critères, algorithme du refuge le plus proche.</span><span data-lang="en">Proximity calculation via Turf.js, road/island intersection, multi-criteria risk scoring, nearest refuge algorithm.</span></p>
+        </div>
+        <div class="method-step reveal">
+            <span class="step-tag visu"><span data-lang="fr">Visualisation</span><span data-lang="en">Visualization</span></span>
+            <div class="m-title"><span data-lang="fr">Cartographie web</span><span data-lang="en">Web Cartography</span></div>
+            <div class="m-sub"><span data-lang="fr">Web Cartography</span><span data-lang="en">Cartographie web</span></div>
+            <p class="m-desc"><span data-lang="fr">Rendu interactif Mapbox GL JS, symbologie graduée, popups enrichis, légende dynamique et dégradé de risque.</span><span data-lang="en">Interactive Mapbox GL JS rendering, graduated symbology, enriched popups, dynamic legend and risk gradient.</span></p>
+        </div>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+
+<!-- SOURCES -->
+<div class="section reveal">
+    <span class="s-tag"><span data-lang="fr">Sources de données</span><span data-lang="en">Data Sources</span></span>
+    <h2 class="s-title"><span data-lang="fr">Données utilisées</span><span data-lang="en">Datasets Used</span></h2>
+</div>
+<div class="section" style="padding-top:0;">
+    <div class="src-grid">
+        <div class="src-card reveal"><div class="src-icon">🌡️</div><div><div class="src-name"><span data-lang="fr">Îlots de chaleur urbains</span><span data-lang="en">Urban Heat Islands</span></div><div class="src-desc"><span data-lang="fr">Classification thermique (classes 1–5), 4 098 polygones · Ville de Montréal</span><span data-lang="en">Thermal classification (classes 1–5), 4,098 polygons · City of Montréal</span></div></div></div>
+        <div class="src-card reveal"><div class="src-icon">👥</div><div><div class="src-name"><span data-lang="fr">Données démographiques</span><span data-lang="en">Demographic Data</span></div><div class="src-desc"><span data-lang="fr">Recensement 2021, 3 281 unités · Statistique Canada</span><span data-lang="en">2021 Census, 3,281 units · Statistics Canada</span></div></div></div>
+        <div class="src-card reveal"><div class="src-icon">🛣️</div><div><div class="src-name"><span data-lang="fr">Réseau routier</span><span data-lang="en">Road Network</span></div><div class="src-desc"><span data-lang="fr">46 293 segments, 5 classes · MTQ (Adresses Québec)</span><span data-lang="en">46,293 segments, 5 classes · MTQ (Adresses Québec)</span></div></div></div>
+        <div class="src-card reveal"><div class="src-icon">🗺️</div><div><div class="src-name">Mapbox GL JS v3.1</div><div class="src-desc"><span data-lang="fr">Rendu cartographique, tuiles vectorielles</span><span data-lang="en">Cartographic rendering, vector tiles</span></div></div></div>
+        <div class="src-card reveal"><div class="src-icon">📐</div><div><div class="src-name">Turf.js v6</div><div class="src-desc"><span data-lang="fr">Analyse spatiale : buffer, intersection, distance, centroïde</span><span data-lang="en">Spatial analysis: buffer, intersection, distance, centroid</span></div></div></div>
+        <div class="src-card reveal"><div class="src-icon">📊</div><div><div class="src-name">Chart.js</div><div class="src-desc"><span data-lang="fr">Visualisation statistique des données thermiques et démographiques</span><span data-lang="en">Statistical visualization of thermal and demographic data</span></div></div></div>
+    </div>
+</div>
+
+
+
+<!-- FOOTER -->
+<footer>
+    <div class="f-logo">🌡️ Îlots de Chaleur — Montréal</div>
+    <p class="f-text">
+        <span data-lang="fr">Projet de session · Géomatique appliquée à la gestion urbaine · 2024–2025</span>
+        <span data-lang="en">Session project · Geomatics Applied to Urban Management · 2024–2025</span><br>
+        Fall Dieumbe · Gadbois-Del Carpio Marie-Hélène · Gueye Abdoulaye · Konkobo Toudasida Evrard
+    </p>
+</footer>
+
+
+<script src="js/app.js"></script>
+<script>
+    const obs = new IntersectionObserver((entries) => {
+        entries.forEach((e, i) => {
+            if (e.isIntersecting) {
+                setTimeout(() => e.target.classList.add('visible'), i * 60);
+                obs.unobserve(e.target);
+            }
+        });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+
+</body>
+</html>

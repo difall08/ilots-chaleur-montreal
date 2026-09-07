@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carte interactive — Îlots de Chaleur Montréal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.1.1/mapbox-gl.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+    <a href="index.html" class="logo">
+        <span class="logo-dot"></span>
+        <span data-lang="fr">Îlots MTL</span>
+        <span data-lang="en">MTL Heat Islands</span>
+    </a>
+    <nav class="main-nav">
+        <a href="index.html"><span data-lang="fr">Accueil</span><span data-lang="en">Home</span></a>
+        <a href="carte.html" class="active"><span data-lang="fr">Carte</span><span data-lang="en">Map</span></a>
+        <a href="donnees.html"><span data-lang="fr">Données</span><span data-lang="en">Data</span></a>
+        <a href="equipe.html"><span data-lang="fr">Équipe</span><span data-lang="en">Team</span></a>
+    </nav>
+    <div class="lang-toggle">
+        <button class="lang-btn active" onclick="setLang('fr')">FR</button>
+        <button class="lang-btn" onclick="setLang('en')">EN</button>
+    </div>
+</header>
+
+
+<!-- SIDEBAR -->
+<div id="sidebar" class="sidebar">
+
+    <div class="sidebar-section-title">
+        🗂️ <span data-lang="fr">Couches de données</span><span data-lang="en">Data layers</span>
+    </div>
+
+    <label class="layer-control">
+        <input type="checkbox" id="population-checkbox" checked>
+        👥 <span data-lang="fr">Population</span><span data-lang="en">Population</span>
+    </label>
+
+    <label class="layer-control">
+        <input type="checkbox" id="ilots-checkbox" checked>
+        🔥 <span data-lang="fr">Îlots de chaleur</span><span data-lang="en">Heat islands</span>
+    </label>
+
+    <label class="layer-control">
+        <input type="checkbox" id="fraicheur-checkbox" checked>
+        ❄️ <span data-lang="fr">Îlots de fraîcheur</span><span data-lang="en">Cool refuges</span>
+    </label>
+
+    <label class="layer-control">
+        <input type="checkbox" id="reseau-checkbox">
+        🛣️ <span data-lang="fr">Réseau routier</span><span data-lang="en">Road network</span>
+    </label>
+
+    <div class="sidebar-section-title" style="margin-top:14px;">
+        🌡️ <span data-lang="fr">Visualisation avancée</span><span data-lang="en">Advanced visualization</span>
+    </div>
+
+    <label class="layer-control">
+        <input type="checkbox" id="heatmap-checkbox">
+        🌡️ <span data-lang="fr">Densité thermique</span><span data-lang="en">Thermal density</span>
+    </label>
+
+    <label class="layer-control">
+        <input type="checkbox" id="accessibility-checkbox">
+        ♿ <span data-lang="fr">Accessibilité aux refuges</span><span data-lang="en">Refuge accessibility</span>
+    </label>
+
+    <div class="score-hint">
+        <span data-lang="fr">♿ couleur des îlots selon distance refuge<br>🚶 cliquer un refuge ❄️ pour l'isochrone</span>
+        <span data-lang="en">♿ island color by refuge distance<br>🚶 click a refuge ❄️ for isochrone</span>
+    </div>
+
+    <div class="sidebar-section-title" style="margin-top:14px;">
+        ⚠️ <span data-lang="fr">Analyse du risque</span><span data-lang="en">Risk analysis</span>
+    </div>
+
+    <label class="layer-control">
+        <input type="checkbox" id="critical-checkbox">
+        ⚠️ <span data-lang="fr">Zones critiques</span><span data-lang="en">Critical zones</span>
+    </label>
+
+    <div class="score-hint">
+        <span data-lang="fr">Score 0–4 basé sur :<br>densité · accès refuge · artère à proximité</span>
+        <span data-lang="en">Score 0–4 based on:<br>density · refuge access · nearby arterial</span>
+    </div>
+
+    <!-- Légende dynamique -->
+    <div id="legend"></div>
+
+</div>
+
+<!-- Flèche toggle -->
+<div id="sidebar-toggle">◀</div>
+
+<!-- CARTE -->
+<div id="map"></div>
+
+
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.1.1/mapbox-gl.js"></script>
+<script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+<script src="js/app.js"></script>
+<script src="js/analysis.js"></script>
+<script src="js/map.js"></script>
+
+</body>
+</html>

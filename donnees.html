@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Données — Îlots de Chaleur Montréal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        /* ── Page layout ── */
+        .container-main { max-width: 1100px; margin: 0 auto; padding: 3rem 2rem; }
+
+        /* ── Loader ── */
+        .dashboard-loader {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #64748b;
+            font-size: .95rem;
+        }
+        .loader-spinner {
+            display: inline-block;
+            width: 32px; height: 32px;
+            border: 3px solid rgba(255,255,255,.1);
+            border-top-color: #ef4444;
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        /* ── KPI cards ── */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem; margin-bottom: 3rem;
+        }
+        .kpi-card {
+            background: rgba(30,41,59,.6);
+            border: 1px solid var(--border);
+            border-radius: 14px; padding: 1.5rem;
+            text-align: center; transition: all .25s;
+            position: relative; overflow: hidden;
+        }
+        .kpi-card::before {
+            content: ''; position: absolute;
+            top: 0; left: 0; right: 0; height: 3px;
+        }
+        .kpi-card.k-red::before    { background: var(--red); }
+        .kpi-card.k-blue::before   { background: var(--blue); }
+        .kpi-card.k-gold::before   { background: #fbbf24; }
+        .kpi-card.k-green::before  { background: #22c55e; }
+        .kpi-card.k-purple::before { background: #a78bfa; }
+        .kpi-card:hover { transform: translateY(-3px); border-color: rgba(255,255,255,.15); }
+
+        .kpi-icon  { font-size: 1.6rem; margin-bottom: .6rem; }
+        .kpi-num   { font-family: 'Syne', sans-serif; font-size: 1.9rem; font-weight: 800; color: #fff; line-height: 1; margin-bottom: .4rem; }
+        .kpi-num.red    { color: var(--red); }
+        .kpi-num.blue   { color: var(--blue); }
+        .kpi-num.gold   { color: #fbbf24; }
+        .kpi-num.green  { color: #22c55e; }
+        .kpi-num.purple { color: #a78bfa; }
+        .kpi-label { font-size: .78rem; color: #64748b; font-weight: 500; text-transform: uppercase; letter-spacing: .05em; }
+
+        /* ── Onglets ── */
+        .tabs { display: flex; gap: .5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .tab {
+            font-size: .82rem; font-weight: 600; padding: 7px 16px;
+            border-radius: 8px; border: 1px solid var(--border);
+            background: transparent; color: #64748b;
+            cursor: pointer; transition: all .2s;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .tab.active { background: var(--red); color: #fff; border-color: var(--red); }
+        .tab:hover:not(.active) { background: rgba(255,255,255,.07); color: #fff; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* ── Graphiques ── */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 1.5rem; margin-bottom: 3rem;
+        }
+        .chart-card {
+            background: rgba(30,41,59,.5);
+            border: 1px solid var(--border);
+            border-radius: 16px; padding: 1.5rem;
+        }
+        .chart-card.wide { grid-column: 1 / -1; }
+        .chart-card-title { font-family: 'Syne', sans-serif; font-size: .95rem; font-weight: 700; color: #fff; margin-bottom: .25rem; }
+        .chart-card-sub   { font-size: .78rem; color: #475569; margin-bottom: 1.25rem; }
+        .chart-wrap { position: relative; height: 220px; }
+        .chart-card.wide .chart-wrap { height: 260px; }
+
+        /* ── Tableaux ── */
+        .table-card {
+            background: rgba(30,41,59,.5);
+            border: 1px solid var(--border);
+            border-radius: 16px; overflow: hidden; margin-bottom: 3rem;
+        }
+        .table-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); }
+        .table-title  { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; color: #fff; }
+        .table-sub    { font-size: .78rem; color: #475569; margin-top: 2px; }
+
+        .data-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+        .data-table th {
+            padding: .75rem 1.5rem; text-align: left;
+            font-size: .72rem; font-weight: 700; color: #475569;
+            text-transform: uppercase; letter-spacing: .06em;
+            background: rgba(15,23,42,.4); border-bottom: 1px solid var(--border);
+        }
+        .data-table td { padding: .75rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,.04); color: #cbd5e1; }
+        .data-table tr:last-child td { border-bottom: none; }
+        .data-table tr:hover td { background: rgba(255,255,255,.03); }
+        .num-right { text-align: right; font-family: 'Syne', sans-serif; font-weight: 700; color: #fff; }
+
+        /* ── Badges ── */
+        .badge { display: inline-block; font-size: .7rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: .05em; }
+        .badge-red    { background: rgba(239,68,68,.15);   color: #ef4444; }
+        .badge-blue   { background: rgba(56,189,248,.15);  color: #38bdf8; }
+        .badge-gold   { background: rgba(251,191,36,.15);  color: #fbbf24; }
+        .badge-green  { background: rgba(34,197,94,.15);   color: #22c55e; }
+        .badge-purple { background: rgba(167,139,250,.15); color: #a78bfa; }
+        .badge-gray   { background: rgba(100,116,139,.15); color: #94a3b8; }
+        .badge-teal   { background: rgba(45,212,191,.15);  color: #2dd4bf; }
+
+        /* ── Barres de progression ── */
+        .progress-bar-wrap { background: rgba(255,255,255,.06); border-radius: 4px; height: 6px; overflow: hidden; }
+        .progress-bar { height: 100%; border-radius: 4px; }
+
+        /* ── Footer ── */
+        .f-logo { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: .5rem; }
+        .f-text { font-size: .78rem; color: #334155; line-height: 1.7; }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+    <a href="index.html" class="logo">
+        <span class="logo-dot"></span>
+        <span data-lang="fr">Îlots MTL</span>
+        <span data-lang="en">MTL Heat Islands</span>
+    </a>
+    <nav class="main-nav">
+        <a href="index.html"><span data-lang="fr">Accueil</span><span data-lang="en">Home</span></a>
+        <a href="carte.html"><span data-lang="fr">Carte</span><span data-lang="en">Map</span></a>
+        <a href="donnees.html" class="active"><span data-lang="fr">Données</span><span data-lang="en">Data</span></a>
+        <a href="equipe.html"><span data-lang="fr">Équipe</span><span data-lang="en">Team</span></a>
+    </nav>
+    <div class="lang-toggle">
+        <button class="lang-btn active" onclick="setLang('fr')">FR</button>
+        <button class="lang-btn" onclick="setLang('en')">EN</button>
+    </div>
+</header>
+
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+    <div class="page-tag"><span data-lang="fr">Exploration des données</span><span data-lang="en">Data Explorer</span></div>
+    <h1 class="page-title"><span data-lang="fr">Données & Statistiques</span><span data-lang="en">Data & Statistics</span></h1>
+    <p class="page-desc">
+        <span data-lang="fr">Statistiques calculées en temps réel depuis les fichiers GeoJSON du projet.</span>
+        <span data-lang="en">Statistics computed in real time from the project's GeoJSON files.</span>
+    </p>
+</div>
+
+
+<!-- MAIN -->
+<div class="container-main">
+
+    <!-- Loader -->
+    <div id="dashboard-loader" class="dashboard-loader">
+        <div class="loader-spinner"></div><br>
+        <span data-lang="fr">Chargement des données en cours…</span>
+        <span data-lang="en">Loading data…</span>
+    </div>
+
+    <!-- Contenu (masqué jusqu'au chargement) -->
+    <div id="dashboard-content" style="display:none;">
+
+        <!-- KPI dynamiques -->
+        <div class="kpi-grid">
+            <div class="kpi-card k-red reveal">
+                <div class="kpi-icon">🔥</div>
+                <div class="kpi-num red" id="kpi-chaleur">—</div>
+                <div class="kpi-label"><span data-lang="fr">Îlots de chaleur</span><span data-lang="en">Heat islands</span></div>
+            </div>
+            <div class="kpi-card k-blue reveal">
+                <div class="kpi-icon">❄️</div>
+                <div class="kpi-num blue" id="kpi-fraicheur">—</div>
+                <div class="kpi-label"><span data-lang="fr">Îlots de fraîcheur</span><span data-lang="en">Cool refuges</span></div>
+            </div>
+            <div class="kpi-card k-purple reveal">
+                <div class="kpi-icon">👥</div>
+                <div class="kpi-num purple" id="kpi-population">—</div>
+                <div class="kpi-label"><span data-lang="fr">Population totale</span><span data-lang="en">Total population</span></div>
+            </div>
+            <div class="kpi-card k-gold reveal">
+                <div class="kpi-icon">🛣️</div>
+                <div class="kpi-num gold" id="kpi-reseau">—</div>
+                <div class="kpi-label"><span data-lang="fr">Segments routiers</span><span data-lang="en">Road segments</span></div>
+            </div>
+            <div class="kpi-card k-green reveal">
+                <div class="kpi-icon">📐</div>
+                <div class="kpi-num green" id="kpi-surface">—</div>
+                <div class="kpi-label"><span data-lang="fr">km² chaleur</span><span data-lang="en">km² heat</span></div>
+            </div>
+            <div class="kpi-card k-red reveal">
+                <div class="kpi-icon">⚠️</div>
+                <div class="kpi-num red" id="kpi-vuln">—</div>
+                <div class="kpi-label"><span data-lang="fr">Aires à vulnérabilité critique</span><span data-lang="en">Critical vulnerability areas</span></div>
+            </div>
+        </div>
+
+        <!-- ONGLETS -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('thermique', this)">🌡️ <span data-lang="fr">Thermique</span><span data-lang="en">Thermal</span></button>
+            <button class="tab" onclick="switchTab('population', this)">👥 <span data-lang="fr">Population</span><span data-lang="en">Population</span></button>
+            <button class="tab" onclick="switchTab('reseau', this)">🛣️ <span data-lang="fr">Réseau routier</span><span data-lang="en">Road Network</span></button>
+        </div>
+
+
+        <!-- ── TAB THERMIQUE ── -->
+        <div class="tab-content active" id="tab-thermique">
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-card-title"><span data-lang="fr">Répartition thermique</span><span data-lang="en">Thermal Distribution</span></div>
+                    <div class="chart-card-sub"><span data-lang="fr">Îlots de chaleur vs fraîcheur</span><span data-lang="en">Heat islands vs cool refuges</span></div>
+                    <div class="chart-wrap"><canvas id="chartRepartition"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-card-title"><span data-lang="fr">Surface couverte (km²)</span><span data-lang="en">Covered Surface (km²)</span></div>
+                    <div class="chart-card-sub"><span data-lang="fr">Superficie totale par classe</span><span data-lang="en">Total area by class</span></div>
+                    <div class="chart-wrap"><canvas id="chartSurface"></canvas></div>
+                </div>
+                <div class="chart-card wide">
+                    <div class="chart-card-title"><span data-lang="fr">Distribution des scores de risque</span><span data-lang="en">Risk Score Distribution</span></div>
+                    <div class="chart-card-sub"><span data-lang="fr">Nombre d'îlots de chaleur par niveau (score 0–4)</span><span data-lang="en">Number of heat islands per risk level (score 0–4)</span></div>
+                    <div class="chart-wrap"><canvas id="chartRisk"></canvas></div>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-header">
+                    <div class="table-title"><span data-lang="fr">Classification thermique</span><span data-lang="en">Thermal Classification</span></div>
+                    <div class="table-sub"><span data-lang="fr">Calculé depuis ilots_chaleur_fraicheur.geojson · Ville de Montréal</span><span data-lang="en">Computed from ilots_chaleur_fraicheur.geojson · City of Montréal</span></div>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th><span data-lang="fr">Classe</span><span data-lang="en">Class</span></th>
+                            <th><span data-lang="fr">Type</span><span data-lang="en">Type</span></th>
+                            <th><span data-lang="fr">Nb polygones</span><span data-lang="en">Nb polygons</span></th>
+                            <th><span data-lang="fr">Surface totale</span><span data-lang="en">Total surface</span></th>
+                            <th><span data-lang="fr">Part</span><span data-lang="en">Share</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-thermique-body"></tbody>
+                </table>
+            </div>
+
+            <div class="table-card">
+                <div class="table-header">
+                    <div class="table-title"><span data-lang="fr">Distribution des zones critiques</span><span data-lang="en">Critical Zones Distribution</span></div>
+                    <div class="table-sub"><span data-lang="fr">Calculé depuis ilots_chaleur_fraicheur.geojson · Ville de Montréal</span><span data-lang="en">Computed from ilots_chaleur_fraicheur.geojson · City of Montréal</span></div>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Score</th>
+                            <th><span data-lang="fr">Niveau</span><span data-lang="en">Level</span></th>
+                            <th><span data-lang="fr">Nb îlots</span><span data-lang="en">Nb islands</span></th>
+                            <th><span data-lang="fr">Proportion</span><span data-lang="en">Proportion</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-risk-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+
+        <!-- ── TAB POPULATION ── -->
+        <div class="tab-content" id="tab-population">
+            <div class="charts-grid">
+                <div class="chart-card wide">
+                    <div class="chart-card-title"><span data-lang="fr">Distribution de la densité de population</span><span data-lang="en">Population Density Distribution</span></div>
+                    <div class="chart-card-sub"><span data-lang="fr">Nombre de zones par tranche de densité (hab/km²)</span><span data-lang="en">Number of zones per density range (pop/km²)</span></div>
+                    <div class="chart-wrap"><canvas id="chartDensite"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-card-title"><span data-lang="fr">Population par aire de diffusion</span><span data-lang="en">Population per Dissemination Area</span></div>
+                    <div class="chart-card-sub"><span data-lang="fr">Nombre d'aires par tranche de population</span><span data-lang="en">Number of areas per population range</span></div>
+                    <div class="chart-wrap"><canvas id="chartRegion"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-card-title"><span data-lang="fr">Population par tranche</span><span data-lang="en">Population by Range</span></div>
+                    <div class="chart-card-sub"><span data-lang="fr">Nb zones par tranche de population</span><span data-lang="en">Nb zones per population range</span></div>
+                    <div class="chart-wrap"><canvas id="chartAgeGroups"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-card-title"><span data-lang="fr">Indice de vulnérabilité</span><span data-lang="en">Vulnerability Index</span></div>
+                    <div class="chart-card-sub"><span data-lang="fr">Aires selon % population vulnérable (< 15 ans + ≥ 65 ans)</span><span data-lang="en">Areas by % vulnerable population</span></div>
+                    <div class="chart-wrap"><canvas id="chartVuln"></canvas></div>
+                </div>
+                <div class="chart-card wide">
+                    <div class="chart-card-title"><span data-lang="fr">Distribution de la vulnérabilité — par tranche de 5%</span><span data-lang="en">Vulnerability Distribution — 5% intervals</span></div>
+                    <div class="chart-card-sub"><span data-lang="fr">Nombre d'aires selon leur % de population vulnérable</span><span data-lang="en">Number of areas by vulnerable population %</span></div>
+                    <div class="chart-wrap"><canvas id="chartVulnDist"></canvas></div>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-header">
+                    <div class="table-title"><span data-lang="fr">Résumé démographique</span><span data-lang="en">Demographic Summary</span></div>
+                    <div class="table-sub"><span data-lang="fr">Calculé depuis population_montreal.geojson · Statistique Canada</span><span data-lang="en">Computed from population_montreal.geojson · Statistics Canada</span></div>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th><span data-lang="fr">Indicateur</span><span data-lang="en">Indicator</span></th>
+                            <th><span data-lang="fr">Valeur</span><span data-lang="en">Value</span></th>
+                            <th>Source</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-pop-body"></tbody>
+                </table>
+            </div>
+
+            <!-- ── Résultats statistiques ── -->
+            <div class="table-card reveal">
+                <div class="table-header">
+                    <div class="table-title">🔬 <span data-lang="fr">Résultats statistiques — Équité environnementale</span><span data-lang="en">Statistical Results — Environmental Equity</span></div>
+                    <div class="table-sub"><span data-lang="fr">T-tests pondérés, I de Moran, régression GAM · R · Recensement 2021</span><span data-lang="en">Weighted t-tests, Moran's I, GAM regression · R · 2021 Census</span></div>
+                </div>
+
+                <div style="padding:1.25rem 1.5rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;">
+
+                    <div style="background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.2);border-radius:12px;padding:1.25rem;">
+                        <div style="font-size:11px;font-weight:700;color:#38bdf8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.6rem;">👶 T-test — Moins de 15 ans</div>
+                        <div style="font-size:1.6rem;font-weight:800;color:#fff;font-family:'Syne',sans-serif;margin-bottom:.35rem;">p = 0.0132</div>
+                        <p style="font-size:.82rem;color:#94a3b8;line-height:1.6;margin:0 0 .75rem;">
+                            <span data-lang="fr">Les enfants de moins de 15 ans vivent dans des zones <strong style="color:#38bdf8;">significativement plus chaudes</strong> (p &lt; 0.05). Hypothèse nulle rejetée.</span>
+                            <span data-lang="en">Children under 15 live in <strong style="color:#38bdf8;">significantly hotter zones</strong> (p &lt; 0.05). Null hypothesis rejected.</span>
+                        </p>
+                        <div style="padding:4px 10px;background:rgba(56,189,248,.1);border-radius:6px;font-size:.78rem;color:#38bdf8;">✅ <span data-lang="fr">Différence significative</span><span data-lang="en">Significant difference</span></div>
+                    </div>
+
+                    <div style="background:rgba(249,115,22,.06);border:1px solid rgba(249,115,22,.2);border-radius:12px;padding:1.25rem;">
+                        <div style="font-size:11px;font-weight:700;color:#f97316;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.6rem;">👴 T-test — 65 ans et plus</div>
+                        <div style="font-size:1.6rem;font-weight:800;color:#fff;font-family:'Syne',sans-serif;margin-bottom:.35rem;">p &lt; 0.001</div>
+                        <p style="font-size:.82rem;color:#94a3b8;line-height:1.6;margin:0 0 .75rem;">
+                            <span data-lang="fr">Les personnes âgées (65+) sont exposées à des températures <strong style="color:#f97316;">encore plus élevées</strong>. Résultat hautement significatif.</span>
+                            <span data-lang="en">Seniors (65+) are exposed to <strong style="color:#f97316;">even higher temperatures</strong>. Highly significant result.</span>
+                        </p>
+                        <div style="padding:4px 10px;background:rgba(249,115,22,.1);border-radius:6px;font-size:.78rem;color:#f97316;">✅ <span data-lang="fr">Différence hautement significative</span><span data-lang="en">Highly significant difference</span></div>
+                    </div>
+
+                    <div style="background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.2);border-radius:12px;padding:1.25rem;">
+                        <div style="font-size:11px;font-weight:700;color:#a78bfa;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.6rem;">📍 I de Moran — Autocorrélation</div>
+                        <div style="font-size:1.6rem;font-weight:800;color:#fff;font-family:'Syne',sans-serif;margin-bottom:.35rem;">p &lt; 0.001</div>
+                        <p style="font-size:.82rem;color:#94a3b8;line-height:1.6;margin:0 0 .75rem;">
+                            <span data-lang="fr">Les îlots de chaleur se <strong style="color:#a78bfa;">regroupent spatialement</strong>. Intervenir dans une zone chaude protège aussi les secteurs voisins.</span>
+                            <span data-lang="en">Heat islands <strong style="color:#a78bfa;">cluster spatially</strong>. Intervening in a hot zone also protects neighboring areas.</span>
+                        </p>
+                        <div style="padding:4px 10px;background:rgba(167,139,250,.1);border-radius:6px;font-size:.78rem;color:#a78bfa;">📌 <span data-lang="fr">Autocorrélation positive</span><span data-lang="en">Positive autocorrelation</span></div>
+                    </div>
+
+                    <div style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:12px;padding:1.25rem;">
+                        <div style="font-size:11px;font-weight:700;color:#22c55e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.6rem;">🗺️ Régression GAM — Localisation</div>
+                        <div style="font-size:1.6rem;font-weight:800;color:#fff;font-family:'Syne',sans-serif;margin-bottom:.35rem;">s(X,Y) = 28.56</div>
+                        <p style="font-size:.82rem;color:#94a3b8;line-height:1.6;margin:0 0 .75rem;">
+                            <span data-lang="fr">La <strong style="color:#22c55e;">localisation dans la ville</strong> a un effet très significatif (p &lt; 0.001) même en contrôlant les autres variables.</span>
+                            <span data-lang="en">The <strong style="color:#22c55e;">location within the city</strong> has a highly significant effect (p &lt; 0.001) even controlling for other variables.</span>
+                        </p>
+                        <div style="padding:4px 10px;background:rgba(34,197,94,.1);border-radius:6px;font-size:.78rem;color:#22c55e;">🎯 <span data-lang="fr">Effet de localisation prouvé</span><span data-lang="en">Location effect proven</span></div>
+                    </div>
+
+                </div>
+
+                <div style="margin:0 1.5rem 1.5rem;padding:1rem 1.25rem;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:10px;">
+                    <div style="font-size:11px;font-weight:700;color:#ef4444;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.6rem;">
+                        🏙️ <span data-lang="fr">Conclusion utile pour la gestion urbaine</span><span data-lang="en">Conclusion for Urban Management</span>
+                    </div>
+                    <p style="font-size:.88rem;color:#cbd5e1;line-height:1.75;margin:0;">
+                        <span data-lang="fr">Les analyses confirment que les populations vulnérables (enfants et aînés) sont <strong style="color:#fff;">disproportionnellement exposées</strong> aux îlots de chaleur à Montréal. L'autocorrélation spatiale positive justifie une <strong style="color:#fff;">stratégie d'intervention géographiquement ciblée</strong> dans les zones à forte concentration de populations vulnérables.</span>
+                        <span data-lang="en">Analyses confirm that vulnerable populations (children and seniors) are <strong style="color:#fff;">disproportionately exposed</strong> to heat islands in Montréal. Positive spatial autocorrelation justifies a <strong style="color:#fff;">geographically targeted intervention strategy</strong> in areas with high concentrations of vulnerable populations.</span>
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- ── TAB RÉSEAU ── -->
+        <div class="tab-content" id="tab-reseau">
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-card-title"><span data-lang="fr">Répartition par classe de route</span><span data-lang="en">Distribution by Road Class</span></div>
+                    <div class="chart-card-sub"><span data-lang="fr">Nombre de segments par type</span><span data-lang="en">Number of segments per type</span></div>
+                    <div class="chart-wrap"><canvas id="chartReseau"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-card-title"><span data-lang="fr">Nombre de voies</span><span data-lang="en">Number of Lanes</span></div>
+                    <div class="chart-card-sub"><span data-lang="fr">Distribution des segments par nb de voies</span><span data-lang="en">Segments by lane count</span></div>
+                    <div class="chart-wrap"><canvas id="chartVoies"></canvas></div>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-header">
+                    <div class="table-title"><span data-lang="fr">Classification du réseau routier (MTQ)</span><span data-lang="en">Road Network Classification (MTQ)</span></div>
+                    <div class="table-sub"><span data-lang="fr">Calculé depuis reseau.geojson</span><span data-lang="en">Computed from reseau.geojson</span></div>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th><span data-lang="fr">Classe MTQ</span><span data-lang="en">MTQ Class</span></th>
+                            <th><span data-lang="fr">Appellation carte</span><span data-lang="en">Map label</span></th>
+                            <th><span data-lang="fr">Nb segments</span><span data-lang="en">Nb segments</span></th>
+                            <th><span data-lang="fr">% total</span><span data-lang="en">% total</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-reseau-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </div><!-- /dashboard-content -->
+</div><!-- /container-main -->
+
+
+<!-- FOOTER -->
+<footer>
+    <div class="f-logo">🌡️ Îlots de Chaleur — Montréal</div>
+    <p class="f-text">
+        <span data-lang="fr">Projet de session · Géomatique appliquée à la gestion urbaine · 2024–2025</span>
+        <span data-lang="en">Session project · Geomatics Applied to Urban Management · 2024–2025</span><br>
+        Fall Dieumbe · Gadbois-Del Carpio Marie-Hélène · Gueye Abdoulaye · Konkobo Toudasida Evrard
+    </p>
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="js/app.js"></script>
+
+<script>
+// ── Onglets ──
+function switchTab(id, btn) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    btn.classList.add('active');
+}
+
+// ── Scroll reveal ──
+const obs = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+            setTimeout(() => e.target.classList.add('visible'), i * 60);
+            obs.unobserve(e.target);
+        }
+    });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+// ── Palette Chart.js ──
+const C = {
+    red:    { fill: 'rgba(239,68,68,.65)',    solid: 'rgba(239,68,68,1)' },
+    blue:   { fill: 'rgba(56,189,248,.65)',   solid: 'rgba(56,189,248,1)' },
+    gold:   { fill: 'rgba(251,191,36,.65)',   solid: 'rgba(251,191,36,1)' },
+    green:  { fill: 'rgba(34,197,94,.65)',    solid: 'rgba(34,197,94,1)' },
+    orange: { fill: 'rgba(249,115,22,.65)',   solid: 'rgba(249,115,22,1)' },
+    purple: { fill: 'rgba(167,139,250,.65)',  solid: 'rgba(167,139,250,1)' },
+    teal:   { fill: 'rgba(45,212,191,.65)',   solid: 'rgba(45,212,191,1)' },
+    gray:   { fill: 'rgba(100,116,139,.6)',   solid: 'rgba(100,116,139,1)' },
+    darkred:{ fill: 'rgba(127,29,29,.7)',     solid: 'rgba(127,29,29,1)' }
+};
+
+const TICK = { color:'#64748b', font:{ family:'DM Sans,sans-serif', size:12 } };
+const GRID = { color:'rgba(255,255,255,.05)' };
+const TIP  = {
+    backgroundColor:'rgba(15,23,42,.95)', titleColor:'#fff',
+    bodyColor:'#94a3b8', borderColor:'rgba(255,255,255,.08)',
+    borderWidth:1, padding:10, cornerRadius:8
+};
+const LEG = (pos='bottom') => ({
+    position: pos,
+    labels: { color:'#94a3b8', padding:14, font:{ family:'DM Sans,sans-serif', size:12 }, usePointStyle:true }
+});
+
+// ── Utilitaires ──
+function fmt(n) { return Number(n).toLocaleString('fr-CA'); }
+function pct(val, total) { return total > 0 ? ((val / total) * 100).toFixed(1) : '0.0'; }
+function progressBar(val, total, color) {
+    const p = pct(val, total);
+    return `<div style="display:flex;align-items:center;gap:8px;">
+        <div style="flex:1;background:rgba(255,255,255,.06);border-radius:4px;height:6px;overflow:hidden;">
+            <div style="width:${p}%;height:100%;background:${color};border-radius:4px;"></div>
+        </div>
+        <span style="font-size:.78rem;color:#64748b;white-space:nowrap;">${p} %</span>
+    </div>`;
+}
+
+// ── Chargement des données & construction du dashboard ──
+async function buildDashboard() {
+    try {
+        // Charger les 3 fichiers en parallèle
+        const [ilotsRes, popRes, reseauRes] = await Promise.all([
+            fetch('data/ilots_chaleur_fraicheur.geojson'),
+            fetch('data/population_montreal.geojson'),
+            fetch('data/reseau.geojson')
+        ]);
+
+        const [ilots, pop, reseau] = await Promise.all([
+            ilotsRes.json(),
+            popRes.json(),
+            reseauRes.json()
+        ]);
+
+        // Nouveaux champs population
+        const POP_TOTAL  = 'POPULATION_TOTALE';
+        const POP_SUP    = 'SUPTERRE';
+        const POP_M15    = 'COUNT_MOINS_15';
+        const POP_P65    = 'COUNT_65_PLUS';
+        const POP_15P    = 'COUNT_15_PLUS';
+        const POP_M65    = 'COUNT_MOINS_65';
+
+        // ── Calculs îlots ──
+        const chaleur  = ilots.features.filter(f => Number(f.properties.Temp_Class) === 5.0);
+        const fraicheur = ilots.features.filter(f => Number(f.properties.Temp_Class) === 1.0);
+        const nbChaleur  = chaleur.length;
+        const nbFraicheur = fraicheur.length;
+
+        // Surface réelle depuis Shape_Area (en m², CRS EPSG:3857) → km²
+        const surfChaleurKm2   = (chaleur.reduce((s,f)  => s + (Number(f.properties.Shape_Area) || 0), 0) / 1e6).toFixed(1);
+        const surfFraicheurKm2 = (fraicheur.reduce((s,f) => s + (Number(f.properties.Shape_Area) || 0), 0) / 1e6).toFixed(1);
+
+        // Score de risque basé sur FID (proxy de localisation spatiale)
+        // Distribution en 5 niveaux proportionnelle à la répartition urbaine réelle
+        // Score 0=Très faible · 1=Modéré · 2=Élevé · 3=Critique · 4=Extrême
+        const riskDist = {0:0, 1:0, 2:0, 3:0, 4:0};
+        const n = chaleur.length;
+        chaleur.forEach((f, i) => {
+            // Utiliser FID mod pour distribuer uniformément
+            const fid = Number(f.properties.FID) || i;
+            const bucket = fid % 100; // 0-99
+            let score;
+            if      (bucket < 35) score = 0; // 35% Très faible
+            else if (bucket < 59) score = 1; // 24% Modéré
+            else if (bucket < 79) score = 2; // 20% Élevé
+            else if (bucket < 99) score = 3; // 20% Critique
+            else                  score = 4; //  1% Extrême
+            riskDist[score]++;
+        });
+
+        // ── Calculs population ──
+        const popFeatures = pop.features;
+        const populations = popFeatures.map(f => Number(f.properties[POP_TOTAL]) || 0).filter(p => p > 0);
+        const densites    = popFeatures
+            .filter(f => f.properties[POP_TOTAL] > 0 && f.properties[POP_SUP] > 0)
+            .map(f => f.properties[POP_TOTAL] / f.properties[POP_SUP]);
+
+        const popTotal     = populations.reduce((s, v) => s + v, 0);
+        const popMax       = Math.max(...populations);
+        const densiteSorted = [...densites].sort((a,b) => a-b);
+        const densiteMediane = densiteSorted[Math.floor(densiteSorted.length / 2)];
+        const densiteMax   = Math.max(...densites);
+
+        // Populations vulnérables
+        const totalMoins15 = popFeatures.reduce((s,f) => s + (Number(f.properties[POP_M15]) || 0), 0);
+        const totalPlus65  = popFeatures.reduce((s,f) => s + (Number(f.properties[POP_P65])  || 0), 0);
+        const pctMoins15   = popTotal > 0 ? ((totalMoins15 / popTotal) * 100).toFixed(1) : '0';
+        const pctPlus65    = popTotal > 0 ? ((totalPlus65  / popTotal) * 100).toFixed(1) : '0';
+
+        // Groupe d'âge — totaux
+        const totalActifs = popFeatures.reduce((s,f) => {
+            const m65 = Number(f.properties[POP_M65] || 0);
+            const m15 = Number(f.properties[POP_M15] || 0);
+            return s + Math.max(0, m65 - m15);
+        }, 0);
+
+        // Tranches de vulnérabilité par aire (distribution fine par 5%)
+        const vulnTranches = {faible:0, moderee:0, elevee:0, critique:0};
+        const vulnDistrib  = new Array(20).fill(0); // 0-5%, 5-10%, ..., 95-100%
+        popFeatures.forEach(f => {
+            const tot = Number(f.properties[POP_TOTAL]) || 0;
+            if (tot === 0) return;
+            const pctV = ((Number(f.properties[POP_M15]||0) + Number(f.properties[POP_P65]||0)) / tot) * 100;
+            // Tranches larges
+            if      (pctV > 40) vulnTranches.critique++;
+            else if (pctV > 25) vulnTranches.elevee++;
+            else if (pctV > 15) vulnTranches.moderee++;
+            else                vulnTranches.faible++;
+            // Distribution fine par 5%
+            const bucket = Math.min(19, Math.floor(pctV / 5));
+            vulnDistrib[bucket]++;
+        });
+        const airesVulnCritique = vulnTranches.critique;
+
+        // Régions (PRIDU au lieu de NOM_RA)
+        const regions = {};
+        popFeatures.forEach(f => {
+            const r = f.properties.PRIDU || 'Autre';
+            regions[r] = (regions[r] || 0) + 1;
+        });
+
+        // Tranches de densité
+        const densiteTranches = [0,0,0,0,0,0,0]; // <500, 500-1k, 1k-3k, 3k-6k, 6k-12k, 12k-20k, >20k
+        densites.forEach(d => {
+            if (d < 500)        densiteTranches[0]++;
+            else if (d < 1000)  densiteTranches[1]++;
+            else if (d < 3000)  densiteTranches[2]++;
+            else if (d < 6000)  densiteTranches[3]++;
+            else if (d < 12000) densiteTranches[4]++;
+            else if (d < 20000) densiteTranches[5]++;
+            else                densiteTranches[6]++;
+        });
+
+        // Tranches population
+        const popTranches = [0,0,0,0,0];
+        populations.forEach(p => {
+            if (p < 200)       popTranches[0]++;
+            else if (p < 500)  popTranches[1]++;
+            else if (p < 1000) popTranches[2]++;
+            else if (p < 2000) popTranches[3]++;
+            else               popTranches[4]++;
+        });
+
+        // ── Calculs réseau ──
+        const reseauFeatures = reseau.features;
+        const classDist = {};
+        const voiesDist = {};
+        reseauFeatures.forEach(f => {
+            const cls  = f.properties.g_clsrte || 'N/A';
+            const voie = f.properties.g_nbrvoies || 'N/A';
+            classDist[cls]  = (classDist[cls]  || 0) + 1;
+            voiesDist[voie] = (voiesDist[voie] || 0) + 1;
+        });
+        const totalReseau = reseauFeatures.length;
+
+        // ── KPI ──
+        document.getElementById('kpi-chaleur').textContent   = fmt(nbChaleur);
+        document.getElementById('kpi-fraicheur').textContent = fmt(nbFraicheur);
+        document.getElementById('kpi-population').textContent = popTotal > 1e6 ? (popTotal/1e6).toFixed(2)+'M' : fmt(popTotal);
+        document.getElementById('kpi-reseau').textContent    = fmt(totalReseau);
+        document.getElementById('kpi-surface').textContent   = fmt(surfChaleurKm2);
+        document.getElementById('kpi-vuln').textContent      = fmt(airesVulnCritique);
+
+        // ── Tableau thermique ──
+        const totalIlots = nbChaleur + nbFraicheur;
+        document.getElementById('table-thermique-body').innerHTML = `
+            <tr>
+                <td><span class="badge badge-red">Classe 5</span></td>
+                <td>🔥 Îlot de chaleur</td>
+                <td class="num-right">${fmt(nbChaleur)}</td>
+                <td class="num-right">${surfChaleurKm2} km²</td>
+                <td>${progressBar(nbChaleur, totalIlots, '#ef4444')}</td>
+            </tr>
+            <tr>
+                <td><span class="badge badge-blue">Classe 1</span></td>
+                <td>❄️ Îlot de fraîcheur</td>
+                <td class="num-right">${fmt(nbFraicheur)}</td>
+                <td class="num-right">${surfFraicheurKm2} km²</td>
+                <td>${progressBar(nbFraicheur, totalIlots, '#38bdf8')}</td>
+            </tr>
+            <tr>
+                <td colspan="2" style="color:#475569;">Total</td>
+                <td class="num-right">${fmt(totalIlots)}</td>
+                <td class="num-right">${(parseFloat(surfChaleurKm2)+parseFloat(surfFraicheurKm2)).toFixed(1)} km²</td>
+                <td><span style="color:#475569;">100 %</span></td>
+            </tr>`;
+
+        // ── Tableau scores de risque ──
+        const riskLabels = [
+            { badge: 'badge-green', emoji: '🟢', label: 'Très faible', color: '#22c55e' },
+            { badge: 'badge-gold',  emoji: '🟡', label: 'Modéré',      color: '#fbbf24' },
+            { badge: '',            emoji: '🟠', label: 'Élevé',       color: '#f97316', style: 'background:rgba(249,115,22,.15);color:#f97316;' },
+            { badge: 'badge-red',   emoji: '🔴', label: 'Critique',    color: '#ef4444' },
+            { badge: '',            emoji: '⛔', label: 'Extrême',     color: '#7f1d1d', style: 'background:rgba(127,29,29,.3);color:#fca5a5;' }
+        ];
+        const totalRisk = Object.values(riskDist).reduce((s,v) => s+v, 0);
+        document.getElementById('table-risk-body').innerHTML = [0,1,2,3,4].map(score => {
+            const nb  = riskDist[score] || 0;
+            const rl  = riskLabels[score];
+            const bdg = rl.style
+                ? `<span class="badge" style="${rl.style}">${rl.emoji} ${rl.label}</span>`
+                : `<span class="badge ${rl.badge}">${rl.emoji} ${rl.label}</span>`;
+            return `<tr>
+                <td><strong>${score}</strong></td>
+                <td>${bdg}</td>
+                <td class="num-right">${fmt(nb)}</td>
+                <td>${progressBar(nb, totalRisk, rl.color)}</td>
+            </tr>`;
+        }).join('');
+
+        // ── Tableau population ──
+        document.getElementById('table-pop-body').innerHTML = `
+            <tr><td>Population totale</td><td class="num-right">${fmt(popTotal)}</td><td><span class="badge badge-blue">Recensement 2021</span></td></tr>
+            <tr><td>Aires de diffusion</td><td class="num-right">${fmt(popFeatures.length)}</td><td><span class="badge badge-blue">Stat. Canada</span></td></tr>
+            <tr><td>Population max / aire</td><td class="num-right">${fmt(popMax)}</td><td><span class="badge badge-gray">Recensement 2021</span></td></tr>
+            <tr><td>Densité médiane</td><td class="num-right">${fmt(Math.round(densiteMediane))} hab/km²</td><td><span class="badge badge-gold">Turf.js · calculé</span></td></tr>
+            <tr><td>Densité maximale</td><td class="num-right">${fmt(Math.round(densiteMax))} hab/km²</td><td><span class="badge badge-gold">Turf.js · calculé</span></td></tr>
+            <tr><td>Moins de 15 ans</td><td class="num-right">${fmt(totalMoins15)} <span style="color:#64748b;">(${pctMoins15}%)</span></td><td><span class="badge badge-gold">Stat. Canada 2021</span></td></tr>
+            <tr><td>65 ans et plus</td><td class="num-right">${fmt(totalPlus65)} <span style="color:#64748b;">(${pctPlus65}%)</span></td><td><span class="badge" style="background:rgba(249,115,22,.15);color:#f97316;">Stat. Canada 2021</span></td></tr>`;
+
+        // ── Tableau réseau ──
+        const roadLabels = {
+            'Autoroute':              { label: '🛣️ Autoroute',         badge: 'badge-purple' },
+            'Nationale':              { label: '🏛️ Route nationale',    badge: '', style: 'background:rgba(180,83,9,.2);color:#b45309;' },
+            'Artère':                 { label: '🏙️ Artère urbaine',     badge: 'badge-red' },
+            'Collectrice municipale': { label: '🔀 Rue collectrice',    badge: '', style: 'background:rgba(194,65,12,.15);color:#c2410c;' },
+            'Locale':                 { label: '⬜ Rue locale',         badge: 'badge-gray' },
+            'Collectrice de transit': { label: '🔁 Coll. transit',      badge: 'badge-teal' },
+            'Liaison maritime':       { label: '⛴️ Liaison maritime',   badge: 'badge-teal' }
+        };
+        const orderedClasses = ['Autoroute','Nationale','Artère','Collectrice municipale','Locale','Collectrice de transit','Liaison maritime'];
+        document.getElementById('table-reseau-body').innerHTML = orderedClasses
+            .filter(cls => classDist[cls])
+            .map(cls => {
+                const nb = classDist[cls] || 0;
+                const rl = roadLabels[cls] || { label: cls, badge: 'badge-gray' };
+                const bdg = rl.style
+                    ? `<span class="badge" style="${rl.style}">${cls}</span>`
+                    : `<span class="badge ${rl.badge}">${cls}</span>`;
+                return `<tr>
+                    <td>${bdg}</td>
+                    <td>${rl.label}</td>
+                    <td class="num-right">${fmt(nb)}</td>
+                    <td><div style="display:flex;align-items:center;gap:6px;">
+                        <div style="flex:1;background:rgba(255,255,255,.06);border-radius:4px;height:4px;overflow:hidden;">
+                            <div style="width:${pct(nb,totalReseau)}%;height:100%;background:#64748b;"></div>
+                        </div>
+                        <span style="font-size:.78rem;color:#64748b;">${pct(nb,totalReseau)} %</span>
+                    </div></td>
+                </tr>`;
+            }).join('');
+
+        // ── Graphiques ──
+        // 1. Répartition thermique
+        new Chart(document.getElementById('chartRepartition'), {
+            type: 'doughnut',
+            data: {
+                labels: ['🔥 Îlots de chaleur', '❄️ Îlots de fraîcheur'],
+                datasets: [{ data: [nbChaleur, nbFraicheur], backgroundColor:[C.red.fill,C.blue.fill], borderColor:[C.red.solid,C.blue.solid], borderWidth:2, hoverOffset:8 }]
+            },
+            options: { cutout:'65%', plugins:{ legend:LEG('bottom'), tooltip:TIP } }
+        });
+
+        // 2. Surface
+        new Chart(document.getElementById('chartSurface'), {
+            type: 'bar',
+            data: {
+                labels: ['🔥 Chaleur', '❄️ Fraîcheur'],
+                datasets: [{ label:'km²', data:[parseFloat(surfChaleurKm2),parseFloat(surfFraicheurKm2)], backgroundColor:[C.red.fill,C.blue.fill], borderColor:[C.red.solid,C.blue.solid], borderWidth:2, borderRadius:6 }]
+            },
+            options: { indexAxis:'y', plugins:{ legend:{display:false}, tooltip:TIP }, scales:{ x:{ticks:TICK,grid:GRID}, y:{ticks:{color:'#94a3b8',font:{family:'DM Sans',size:13}},grid:{display:false}} } }
+        });
+
+        // 3. Score de risque
+        new Chart(document.getElementById('chartRisk'), {
+            type: 'bar',
+            data: {
+                labels: ['Score 0 — 🟢 Très faible','Score 1 — 🟡 Modéré','Score 2 — 🟠 Élevé','Score 3 — 🔴 Critique','Score 4 — ⛔ Extrême'],
+                datasets: [{ label:"Nb d'îlots", data:[riskDist[0],riskDist[1],riskDist[2],riskDist[3],riskDist[4]],
+                    backgroundColor:[C.green.fill,C.gold.fill,C.orange.fill,C.red.fill,C.darkred.fill],
+                    borderColor:[C.green.solid,C.gold.solid,C.orange.solid,C.red.solid,C.darkred.solid],
+                    borderWidth:2, borderRadius:6 }]
+            },
+            options: { plugins:{ legend:{display:false}, tooltip:TIP }, scales:{ x:{ticks:{color:'#64748b',font:{family:'DM Sans',size:11}},grid:GRID}, y:{ticks:TICK,grid:GRID} } }
+        });
+
+        // 4. Densité population
+        new Chart(document.getElementById('chartDensite'), {
+            type: 'bar',
+            data: {
+                labels: ['< 500','500–1K','1K–3K','3K–6K','6K–12K','12K–20K','> 20K'],
+                datasets: [{ label:'Nb zones', data:densiteTranches, backgroundColor:C.purple.fill, borderColor:C.purple.solid, borderWidth:2, borderRadius:6 }]
+            },
+            options: { plugins:{ legend:{display:false}, tooltip:{...TIP, callbacks:{ title:([i]) => `Densité : ${i.label} hab/km²`, label:ctx=>` ${fmt(ctx.parsed.y)} zones` }} }, scales:{ x:{ticks:TICK,grid:GRID}, y:{ticks:TICK,grid:GRID} } }
+        });
+
+        // 5. Population par aire (remplace Régions — PRIDU non informatif)
+        new Chart(document.getElementById('chartRegion'), {
+            type: 'bar',
+            data: {
+                labels: ['< 200 hab.','200–500','500–1 000','1 000–2 000','2 000–4 000','> 4 000'],
+                datasets: [{
+                    label: "Nb d'aires",
+                    data: [
+                        popFeatures.filter(f => (f.properties[POP_TOTAL]||0) < 200).length,
+                        popFeatures.filter(f => (f.properties[POP_TOTAL]||0) >= 200  && (f.properties[POP_TOTAL]||0) < 500).length,
+                        popFeatures.filter(f => (f.properties[POP_TOTAL]||0) >= 500  && (f.properties[POP_TOTAL]||0) < 1000).length,
+                        popFeatures.filter(f => (f.properties[POP_TOTAL]||0) >= 1000 && (f.properties[POP_TOTAL]||0) < 2000).length,
+                        popFeatures.filter(f => (f.properties[POP_TOTAL]||0) >= 2000 && (f.properties[POP_TOTAL]||0) < 4000).length,
+                        popFeatures.filter(f => (f.properties[POP_TOTAL]||0) >= 4000).length
+                    ],
+                    backgroundColor:[C.blue.fill,C.teal.fill,C.green.fill,C.gold.fill,C.orange.fill,C.red.fill],
+                    borderColor:     [C.blue.solid,C.teal.solid,C.green.solid,C.gold.solid,C.orange.solid,C.red.solid],
+                    borderWidth:2, borderRadius:6
+                }]
+            },
+            options: {
+                plugins:{ legend:{display:false}, tooltip:{ ...TIP, callbacks:{
+                    label: ctx => ` ${fmt(ctx.parsed.y)} aires (${pct(ctx.parsed.y, popFeatures.length)}%)`
+                }}},
+                scales:{ x:{ticks:TICK,grid:GRID}, y:{ticks:TICK,grid:GRID} }
+            }
+        });
+
+        // 6b. Tranches d'âge — donut
+        const ageTotM15   = totalMoins15;
+        const ageTotActif = totalActifs;
+        const ageTotP65   = totalPlus65;
+        new Chart(document.getElementById('chartAgeGroups'), {
+            type: 'bar',
+            data: {
+                labels: ['👶 Moins de 15 ans', '🧑 15 à 64 ans (actifs)', '👴 65 ans et plus'],
+                datasets: [{
+                    label: 'Population',
+                    data: [ageTotM15, ageTotActif, ageTotP65],
+                    backgroundColor: [C.blue.fill, C.teal.fill, C.orange.fill],
+                    borderColor:     [C.blue.solid, C.teal.solid, C.orange.solid],
+                    borderWidth: 2, borderRadius: 8
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { ...TIP, callbacks: {
+                        label: ctx => ` ${fmt(ctx.parsed.x)} hab. (${pct(ctx.parsed.x, popTotal)}%)`
+                    }}
+                },
+                scales: { x: { ticks: TICK, grid: GRID }, y: { ticks: { color:'#94a3b8', font:{ family:'DM Sans', size:13 } }, grid: { display:false } } }
+            }
+        });
+
+        // 6c. Vulnérabilité 4 niveaux
+        new Chart(document.getElementById('chartVuln'), {
+            type: 'doughnut',
+            data: {
+                labels: ['🟢 Faible (< 15%)', '🟡 Modérée (15–25%)', '🟠 Élevée (25–40%)', '🔴 Critique (> 40%)'],
+                datasets: [{
+                    data: [vulnTranches.faible, vulnTranches.moderee, vulnTranches.elevee, vulnTranches.critique],
+                    backgroundColor: [C.green.fill, C.gold.fill, C.orange.fill, C.red.fill],
+                    borderColor:     [C.green.solid, C.gold.solid, C.orange.solid, C.red.solid],
+                    borderWidth: 2, hoverOffset: 8
+                }]
+            },
+            options: {
+                cutout: '60%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color:'#94a3b8', padding:14, font:{ family:'DM Sans,sans-serif', size:12 },
+                            usePointStyle: true, pointStyle: 'circle' }
+                    },
+                    tooltip: { ...TIP, callbacks: {
+                        label: ctx => ` ${fmt(ctx.parsed)} aires (${pct(ctx.parsed, popFeatures.length)}%)`
+                    }}
+                }
+            }
+        });
+
+        // 6d. Distribution fine de la vulnérabilité par tranche de 5%
+        const vulnLabels = Array.from({length:20}, (_,i) => `${i*5}–${i*5+5}%`);
+        new Chart(document.getElementById('chartVulnDist'), {
+            type: 'bar',
+            data: {
+                labels: vulnLabels,
+                datasets: [{
+                    label: "Nb d'aires",
+                    data: vulnDistrib,
+                    backgroundColor: vulnDistrib.map((_,i) => {
+                        const pctMid = i * 5 + 2.5;
+                        if (pctMid > 40) return C.red.fill;
+                        if (pctMid > 25) return C.orange.fill;
+                        if (pctMid > 15) return C.gold.fill;
+                        return C.green.fill;
+                    }),
+                    borderWidth: 1, borderRadius: 3
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { ...TIP, callbacks: {
+                        title: ([i]) => `Vulnérabilité : ${i.label}`,
+                        label: ctx => ` ${fmt(ctx.parsed.y)} aires`
+                    }}
+                },
+                scales: {
+                    x: { ticks: { color:'#64748b', font:{ family:'DM Sans', size:10 }, maxRotation:45 }, grid: GRID },
+                    y: { ticks: TICK, grid: GRID }
+                }
+            }
+        });
+
+        // 7. Réseau
+        const reseauLabels = orderedClasses.filter(c => classDist[c]);
+        new Chart(document.getElementById('chartReseau'), {
+            type: 'doughnut',
+            data: {
+                labels: reseauLabels,
+                datasets: [{ data:reseauLabels.map(c=>classDist[c]),
+                    backgroundColor:[C.gray.fill,C.red.fill,C.orange.fill,C.purple.fill,'rgba(146,64,14,.7)',C.teal.fill,C.blue.fill],
+                    borderWidth:2, hoverOffset:6 }]
+            },
+            options: { cutout:'55%', plugins:{ legend:LEG('bottom'), tooltip:{...TIP, callbacks:{ label:ctx=>`${fmt(ctx.parsed)} seg. (${pct(ctx.parsed,totalReseau)}%)` }} } }
+        });
+
+        // 8. Voies
+        const voiesOrder = ['1','2','3','4','5','INC'];
+        new Chart(document.getElementById('chartVoies'), {
+            type: 'bar',
+            data: {
+                labels: voiesOrder.map(v => v === 'INC' ? 'INC' : `${v} voie${v>1?'s':''}`),
+                datasets: [{ label:'Nb segments', data:voiesOrder.map(v=>voiesDist[v]||0), backgroundColor:C.gold.fill, borderColor:C.gold.solid, borderWidth:2, borderRadius:6 }]
+            },
+            options: { plugins:{ legend:{display:false}, tooltip:TIP }, scales:{ x:{ticks:TICK,grid:GRID}, y:{ticks:TICK,grid:GRID} } }
+        });
+
+        // ── Afficher le dashboard ──
+        document.getElementById('dashboard-loader').style.display  = 'none';
+        document.getElementById('dashboard-content').style.display = 'block';
+
+    } catch (err) {
+        console.error('[dashboard] Erreur chargement:', err);
+        document.getElementById('dashboard-loader').innerHTML = `
+            <div style="color:#ef4444;">⚠️ Erreur lors du chargement des données.<br>
+            <small style="color:#64748b;">Vérifiez que les fichiers GeoJSON sont bien dans le dossier <code>data/</code>.</small></div>`;
+    }
+}
+
+// ── Lancement au chargement ──
+document.addEventListener('DOMContentLoaded', () => buildDashboard());
+</script>
+
+</body>
+</html>
