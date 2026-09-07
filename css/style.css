@@ -1,0 +1,589 @@
+/* ===============================
+   style.css — CSS Global
+   Îlots de Chaleur — Montréal
+   Référence : index.html
+   =============================== */
+
+
+/* ── Variables ── */
+:root {
+    --red:    #ef4444;
+    --blue:   #38bdf8;
+    --dark:   #0f172a;
+    --mid:    #1e293b;
+    --muted:  #64748b;
+    --border: rgba(255, 255, 255, 0.08);
+}
+
+
+/* ── Reset ── */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--dark);
+    color: #e2e8f0;
+    overflow-x: hidden;
+}
+
+
+/* ===============================
+   HEADER
+   =============================== */
+.site-header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    height: 64px;
+    background: rgba(15, 23, 42, 0.88);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+}
+
+.logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.05rem;
+    color: #fff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--red);
+    box-shadow: 0 0 12px var(--red);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50%       { transform: scale(1.5); opacity: .7; }
+}
+
+.main-nav {
+    display: flex;
+    gap: .2rem;
+}
+
+.main-nav a {
+    font-size: .85rem;
+    font-weight: 500;
+    color: #94a3b8;
+    text-decoration: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    transition: all .2s;
+}
+
+.main-nav a:hover,
+.main-nav a.active {
+    color: #fff;
+    background: rgba(255, 255, 255, .07);
+}
+
+.lang-toggle {
+    display: flex;
+    gap: 4px;
+    background: rgba(255, 255, 255, .05);
+    border-radius: 8px;
+    padding: 3px;
+}
+
+.lang-btn {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    border: none;
+    background: transparent;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all .2s;
+}
+
+.lang-btn.active {
+    background: var(--red);
+    color: #fff;
+}
+
+
+/* ===============================
+   BOUTONS
+   =============================== */
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--red);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: .95rem;
+    padding: 12px 28px;
+    border-radius: 10px;
+    transition: all .25s;
+    box-shadow: 0 4px 20px rgba(239, 68, 68, .3);
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(239, 68, 68, .4);
+    color: #fff;
+    text-decoration: none;
+}
+
+.btn-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid rgba(255, 255, 255, .12);
+    color: #e2e8f0;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: .95rem;
+    padding: 12px 28px;
+    border-radius: 10px;
+    transition: all .25s;
+    cursor: pointer;
+}
+
+.btn-outline:hover {
+    background: rgba(255, 255, 255, .1);
+    transform: translateY(-2px);
+    color: #fff;
+    text-decoration: none;
+}
+
+
+/* ===============================
+   SECTIONS — Éléments communs
+   =============================== */
+.section {
+    padding: 5rem 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.s-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: .75rem;
+}
+
+.s-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 1rem;
+}
+
+.s-desc {
+    color: #94a3b8;
+    font-size: 1rem;
+    line-height: 1.75;
+    max-width: 680px;
+    margin-bottom: 3rem;
+}
+
+.divider {
+    height: 1px;
+    background: var(--border);
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* Page hero (pages internes) */
+.page-hero {
+    padding: 7rem 2rem 3rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(239,68,68,.04) 0%, transparent 100%);
+}
+
+.page-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: .75rem;
+}
+
+.page-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 1rem;
+}
+
+.page-desc {
+    font-size: 1rem;
+    color: #64748b;
+    max-width: 580px;
+    margin: 0 auto;
+    line-height: 1.75;
+}
+
+
+/* ===============================
+   FOOTER
+   =============================== */
+footer {
+    background: rgba(15, 23, 42, .9);
+    border-top: 1px solid var(--border);
+    padding: 2rem;
+    text-align: center;
+}
+
+.f-logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: .5rem;
+}
+
+.f-text {
+    font-size: .78rem;
+    color: #334155;
+    line-height: 1.7;
+}
+
+
+/* ===============================
+   ANIMATIONS
+   =============================== */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: none; }
+}
+
+@keyframes drift {
+    from { transform: translate(0, 0); }
+    to   { transform: translate(50px, 35px); }
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+.reveal {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity .6s ease, transform .6s ease;
+}
+
+.reveal.visible {
+    opacity: 1;
+    transform: none;
+}
+
+
+/* ===============================
+   LANGUE FR/EN
+   =============================== */
+[data-lang="en"] { display: none; }
+
+body.lang-en [data-lang="fr"] { display: none; }
+body.lang-en [data-lang="en"] { display: block; }
+body.lang-en span[data-lang="en"] { display: inline; }
+body.lang-en span[data-lang="fr"] { display: none; }
+
+
+/* ===============================
+   CARTE — Map container
+   =============================== */
+#map {
+    width: 100%;
+    height: calc(100vh - 64px);
+    margin-top: 64px;
+}
+
+
+/* ===============================
+   SIDEBAR
+   =============================== */
+.sidebar {
+    position: absolute;
+    top: 80px;
+    left: 20px;
+    width: 265px;
+    background: rgba(15, 23, 42, .95);
+    backdrop-filter: blur(12px);
+    padding: 1.25rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .3);
+    z-index: 10;
+    transition: width .3s ease, padding .3s ease, opacity .3s ease;
+}
+
+#sidebar.collapsed {
+    width: 0;
+    padding: 0;
+    overflow: hidden;
+    opacity: 0;
+    border: none;
+}
+
+.sidebar-section-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin: 12px 0 7px;
+}
+
+.layer-control {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    color: #e2e8f0;
+    user-select: none;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.layer-control input[type="checkbox"] {
+    accent-color: var(--red);
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.layer-control:hover { color: #fff; }
+
+.score-hint {
+    font-size: 11px;
+    color: #475569;
+    margin-top: 4px;
+    line-height: 1.5;
+}
+
+#sidebar-toggle {
+    position: absolute;
+    top: 90px;
+    left: 295px;
+    background: rgba(15, 23, 42, .92);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+    color: #e2e8f0;
+    padding: 5px 8px;
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 13px;
+    z-index: 20;
+    transition: left .3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .2);
+}
+
+#sidebar-toggle:hover {
+    background: var(--mid);
+    color: #fff;
+}
+
+#sidebar.collapsed + #sidebar-toggle {
+    left: 25px;
+}
+
+
+/* ===============================
+   LÉGENDE
+   =============================== */
+#legend {
+    margin-top: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: #e2e8f0;
+}
+
+#legend h4 {
+    margin: 0 0 5px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+
+#legend hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 8px 0;
+}
+
+#legend .legend-section {
+    margin-bottom: 2px;
+}
+
+
+/* ===============================
+   POPUP MAPBOX
+   =============================== */
+.mapboxgl-popup-content {
+    background: rgba(15, 23, 42, .97) !important;
+    color: #e2e8f0 !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .3) !important;
+    padding: 14px 16px !important;
+    min-width: 280px !important;
+    max-width: 300px !important;
+    box-sizing: border-box !important;
+    word-break: break-word !important;
+    font-family: 'DM Sans', sans-serif !important;
+}
+
+.mapboxgl-popup-close-button {
+    color: #64748b !important;
+    font-size: 18px !important;
+    padding: 2px 6px !important;
+    background: transparent !important;
+}
+
+.mapboxgl-popup-close-button:hover {
+    color: #fff !important;
+    background: rgba(255, 255, 255, .08) !important;
+    border-radius: 4px !important;
+}
+
+.mapboxgl-popup-tip {
+    border-top-color: rgba(15, 23, 42, .97) !important;
+}
+
+
+/* ===============================
+   CONTRÔLE FOND DE CARTE
+   =============================== */
+.mapboxgl-ctrl.basemap-control {
+    background: rgba(15, 23, 42, .92);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .25);
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.basemap-control .basemap-button {
+    font-size: 20px;
+    padding: 4px 6px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background .2s;
+    color: #fff;
+}
+
+.basemap-control .basemap-button:hover {
+    background: rgba(255, 255, 255, .1);
+}
+
+.basemap-menu {
+    display: none;
+    margin-top: 6px;
+    background: rgba(15, 23, 42, .97);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .3);
+    width: 130px;
+    overflow: hidden;
+}
+
+.basemap-menu div {
+    padding: 8px 12px;
+    font-size: 13px;
+    color: #94a3b8;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: all .15s;
+    font-family: 'DM Sans', sans-serif;
+}
+
+.basemap-menu div:last-child {
+    border-bottom: none;
+}
+
+.basemap-menu div:hover {
+    background: rgba(255, 255, 255, .07);
+    color: #fff;
+}
+
+
+/* ===============================
+   RESPONSIVE
+   =============================== */
+@media (max-width: 768px) {
+    .site-header {
+        padding: 0 1rem;
+        flex-wrap: wrap;
+        height: auto;
+        min-height: 56px;
+        gap: .5rem;
+        padding-top: .5rem;
+        padding-bottom: .5rem;
+    }
+
+    .main-nav a {
+        font-size: .78rem;
+        padding: 5px 8px;
+    }
+
+    .sidebar {
+        width: 230px;
+        top: 70px;
+        left: 10px;
+    }
+
+    #sidebar-toggle {
+        top: 80px;
+        left: 250px;
+    }
+
+    #sidebar.collapsed + #sidebar-toggle {
+        left: 15px;
+    }
+
+    .lang-toggle {
+        display: none;
+    }
+
+    .section {
+        padding: 3rem 1rem;
+    }
+}
