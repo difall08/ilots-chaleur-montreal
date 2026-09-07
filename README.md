@@ -2,7 +2,6 @@
 
 Plateforme web géospatiale interactive pour la visualisation, l'analyse et la surveillance des îlots de chaleur et de fraîcheur de Montréal, combinant données populationnelles, accessibilité aux refuges climatiques et analyse du risque thermique.
 
-![Aperçu de la plateforme](preview.png)
 
 ---
 
